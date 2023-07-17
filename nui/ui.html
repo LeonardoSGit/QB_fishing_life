@@ -1,0 +1,465 @@
+<html lang="en" class="">
+	<head>
+		<meta charset="UTF-8">
+		<title>Fishing Life</title>
+		<meta name="robots" content="noindex">
+		<link rel="stylesheet" href="css/style.css">
+		
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+			
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+		
+		<link id="css-bs-light" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous" disabled>
+		<link id="css-bs-dark" rel="stylesheet" href="css/bootstrap-night.css">
+		<link id="css-light" rel="stylesheet" href="css/light-style.css" disabled>
+		<link id="css-dark" rel="stylesheet" href="css/dark-style.css">
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	
+	</head>
+
+	<body>
+		<div class="main backgound-theme" style="display: none;">
+			<div class="backdrop-blur"></div>
+			<nav class="sidebar-navigation">
+				<ul id="nav-bar">
+				</ul>
+			</nav>
+			
+			<div class="container-pages">
+				<div class="d-flex player-info-container">
+					<div class="d-flex mr-4">
+						<h4 class="m-0 mr-1 text-primary player-info-item">LVL.</h4>
+						<h5 id="player-info-level" class="m-0 player-info-item"></h5>
+					</div>
+					<div class="d-flex mr-4">
+						<i class="fas fa-star mr-1 text-primary player-info-item"></i>
+						<h4 id="player-info-skill" class="m-0 player-info-item"></h4>
+					</div>
+					<div id="player-info-money-container" class="d-flex mr-4">
+						<i class="fas fa-coins mr-1 text-primary player-info-item"></i>
+						<h4 id="player-info-money" class="m-0 player-info-item"></h4>
+					</div>
+					<div class="custom-control custom-switch">
+						<input type="checkbox" class="custom-control-input" id="css-toggle" checked="">
+						<label class="custom-control-label" for="css-toggle"></label>
+						<i id="dark-theme-icon" class="fas fa-moon mr-1 text-primary player-info-item" for="css-toggle" style="display: none;"></i>
+						<i id="light-theme-icon" class="fas fa-sun mr-1 text-primary player-info-item" for="css-toggle"></i>
+					</div>
+				</div>
+
+				<div class="pages profile-page" style="height: 100%;">
+					<div class="row" style="height: 100%;">
+						<div class="col-md-12" style="height: 100%;">
+							<div class="col-12 mt-3 mb-3" id="profile-title-div">
+								<h4 id="main-page-title" class="text-uppercase"></h4>
+								<p id="main-page-desc"></p>
+							</div>
+							<div style="max-height: calc(100% - var(--profile-title-height)); overflow: auto;">
+								<div class="row mb-3">
+									<div class="col-6">
+										<div class="card card-centering">
+											<div class="card-content">
+												<div class="card-body">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-money-earned" class="text-success">$0.00</h3>
+															<span id="profile-money-earned-2">Total money earned</span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-money-check-alt text-success font-large-2 float-right"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card card-centering">
+											<div class="card-content">
+												<div class="card-body">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-money-spent" class="text-success">$0.00</h3>
+															<span id="profile-money-spent-2">Total money spent</span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-money-check text-success font-large-2 float-right"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-3">
+										<div class="card card-centering">
+											<div class="card-content">
+												<div class="card-body">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-goods" class="blue">0</h3>
+															<span id="profile-goods-2">Goods bought</span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-truck-loading blue font-large-2 float-right"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-3">
+										<div class="card card-centering">
+											<div class="card-content">
+												<div class="card-body">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-distance-traveled" class="blue">0km</h3>
+															<span id="profile-distance-traveled-2">Distance traveled</span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-route blue font-large-2 float-right"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-3">
+										<div class="card card-centering">
+											<div class="card-content">
+												<div class="card-body">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-total-visits" class="text-danger">0</h3>
+															<span id="profile-total-visits-2">Total visits</span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-map-marker-alt text-danger font-large-2 float-right"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-3">
+										<div class="card card-centering">
+											<div class="card-content">
+												<div class="card-body">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-customers" class="text-danger">0</h3>
+															<span id="profile-customers-2">Customers</span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-users text-danger font-large-2 float-right"></i>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-12">
+										<div class="card overflow-hidden card-centering">
+											<div class="card-content">
+												<div class="card-body cleartfix">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-stock-1" class="amber accent-4">0.0% <small class="text-danger"><b>Staying with LOW STOCK will make you lose your business!</b></small></h3>
+															<span id="profile-stock-2">Stock Capacity (Max: 150)</span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-boxes amber accent-4 font-large-2 float-right"></i>
+														</div>
+													</div>
+													<div id="profile-stock-3" class="progress mt-1 mb-0" style="height: 7px;"><div class="progress-bar bg-amber accent-4" role="progressbar" style="width: 0.0%" aria-valuenow="0.0" aria-valuemin="0" aria-valuemax="100"></div></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				
+				<div class="pages deliveries-page" style="height: 100%;">
+					<div id="deliveries-title-div" class="col-12 mt-3 mb-3">
+
+					</div>
+					<div id="list-available-contracts" class="row" style="max-height: calc(100% - var(--deliveries-title-height)); overflow: auto;">
+						
+					</div>
+					<div id="deliveries-footer-div" class="m-1">
+						<i class="fa-solid fa-clock" style="font-size: 15px;"></i><span id="new-contracts-text" class="ml-2"></span>
+					</div>
+				</div>
+
+				<div class="pages store-page" style="display: none; height: 100%;">
+					<div id="store-title-div" class="col-12 mt-3 mb-3">
+
+					</div>
+					<div>
+						<div id="store-navigation-tab" class="col-12 navigation-tabs-container mb-2">
+							
+						</div>
+						<div class="tabs store-vehicle-tab">
+							<div id="store-vehicle-page-list" class="row"  style="max-height: calc(100% - var(--store-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+						<div class="tabs store-boat-tab">
+							<div id="store-boat-page-list" class="row"  style="max-height: calc(100% - var(--store-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+						<div class="tabs store-property-tab">
+							<div id="store-property-page-list" class="row"  style="max-height: calc(100% - var(--store-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+					</div>
+				</div>	
+				
+				<div class="pages owned-vehicle-page" style="display: none; height: 100%;">
+					<div id="owned-vehicle-title-div" class="col-12 mt-3 mb-2">
+					</div>
+					<div>
+						<div id="owned-vehicle-navigation-tab" class="col-12 navigation-tabs-container mb-2">
+							
+						</div>
+						<div class="tabs owned-vehicle-tab">
+							<div id="owned-vehicle-page-list" class="list list-inline"  style="height: calc(100% - var(--owned-vehicle-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+						<div class="tabs owned-boat-tab">
+							<div id="owned-boat-page-list" class="list list-inline"  style="height: calc(100% - var(--owned-vehicle-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+					</div>
+				</div>	
+
+				<div class="pages owned-property-page" style="display: none; height: 100%;">
+					<div id="owned-property-title-div" class="col-12 mt-3 mb-2">
+					</div>
+					<div>
+						<div id="owned-property-page-list" class="list list-inline"  style="height: calc(100% - var(--owned-property-title-height)); overflow: auto;">
+							
+						</div>
+					</div>
+				</div>	
+
+				<div class="pages bank-page" style="display: none;">
+					<div id="bank-title-div" class="col-12 mt-3 mb-3">
+						
+					</div>
+					<div style="max-height: calc(100% - var(--bank-title-height)); overflow: auto;">
+						<div class="d-flex mb-2">
+							<div class="card card-body mr-2" style="width: 55%;">
+								<div class="d-flex justify-content-between mx-2 my-4">
+									<div>
+										<h6 id="bank-balance-text"></h6>
+										<div class="d-flex align-items-center mt-3">
+											<i class="fas fa-coins text-primary font-large-2" aria-hidden="true"></i>
+											<h3 id="bank-money" style="font-size: 48px;" class="bank-money-title mb-0 ml-4"></h3>
+										</div>
+									</div>
+									<div class="d-flex flex-column justify-content-between" style="min-width: 200px;">
+										<button data-toggle="modal" data-target="#deposit-modal" id="deposit-money-btn" class="btn btn-outline-primary"></button>
+										<button data-toggle="modal" data-target="#withdraw-modal" id="withdraw-money-btn" class="btn btn-primary"></button>
+									</div>
+								</div>
+							</div>
+							<div id="loans-card-container" class="card card-body d-flex align-items-center" style="width: 45%;">
+								<h4 id="bank-loans-title" class="bank-loan-title" style="font-weight: 600;"></h4>
+								<p id="bank-loans-desc" style="text-align: center;margin: 9px 0px;"></p>
+								<button data-toggle="modal" data-target="#loans-modal" id="bank-loans-btn" class="btn btn-outline-primary" style="min-width: 200px;"></button>
+							</div>
+						</div>
+						<div id="loan-table-container" class="card pb-2 pt-4 px-4 w-auto mb-3" style="display: none;">
+							<h4 id="active-loans-title" class="bank-loan-title" style="font-weight: 600;"></h4>
+							<div class="loans-table-container">
+								<table class="table mb-0">
+									<thead>
+										<tr>
+											<th id="loan-value-title" style="width: 20%;"></th>
+											<th id="loan-daily-title" style="width: 25%;"></th>
+											<th id="loan-remaining-title" style="width: 25%;"></th>
+											<th style="width: 30%;"></th>
+										</tr>
+									</thead>
+									<tbody id="loan-table-body">
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Modals -->
+				<div class="modal fade" id="loans-modal" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="loan-modal-title"></h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form id="form-loan" style="margin: 0;">
+								<div class="modal-body">
+									<p id="loan-modal-desc"></p>
+									<div class="form-check mb-2">
+										<input class="form-check-input" type="radio" name="loan-radio" id="loan-1" value="4" checked>
+										<label id="loan-modal-label-1" class="form-check-label" for="loan-1"></label>
+									</div>
+									<div class="form-check mb-2">
+										<input class="form-check-input" type="radio" name="loan-radio" id="loan-2" value="3" >
+										<label id="loan-modal-label-2" class="form-check-label" for="loan-2"></label>
+									</div>
+									<div class="form-check mb-2">
+										<input class="form-check-input" type="radio" name="loan-radio" id="loan-3" value="2" >
+										<label id="loan-modal-label-3" class="form-check-label" for="loan-3"></label>
+									</div>
+									<div class="form-check mb-2">
+										<input class="form-check-input" type="radio" name="loan-radio" id="loan-4" value="1" >
+										<label id="loan-modal-label-4" class="form-check-label" for="loan-4"></label>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button id="loan-modal-cancel" type="button" class="btn btn-outline-primary" data-dismiss="modal"></button>
+									<button id="loan-modal-submit" type="submit" class="btn btn-primary"></button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" id="deposit-modal" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="deposit-modal-title"></h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form id="form-deposit-money" style="margin: 0;">
+								<div class="modal-body">
+									<div class="form-group">
+										<label id="deposit-modal-desc" for="deposit-modal-money-amount"></label>
+										<input type="number" class="form-control mb-1 mt-2" id="deposit-modal-money-amount" placeholder="" name="amount" required>
+										<small id="deposit-modal-money-available" class="text-muted" style="font-size: 12px;"></small>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button id="deposit-modal-cancel" type="button" class="btn btn-outline-primary" data-dismiss="modal"></button>
+									<button id="deposit-modal-submit" type="submit" class="btn btn-primary"></button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" id="withdraw-modal" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="withdraw-modal-title"></h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form id="form-withdraw-money" style="margin: 0;">
+								<div class="modal-body">
+									<div class="form-group">
+										<label id="withdraw-modal-desc" for="withdraw-modal-money-amount"></label>
+										<input type="number" class="form-control mb-1 mt-2" id="withdraw-modal-money-amount" placeholder="" name="amount" required>
+										<small id="withdraw-modal-money-available" class="text-muted" style="font-size: 12px;"></small>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button id="withdraw-modal-cancel" type="button" class="btn btn-outline-primary" data-dismiss="modal"></button>
+									<button id="withdraw-modal-submit" type="submit" class="btn btn-primary"></button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				
+				<div class="modal fade" id="stock-modal" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="inventory-modal-title"></h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="pages stock-page" style="display: none; height: 100%;">
+								<div id="stock-title-div" class="col-12 mt-3 mb-1">
+
+								</div>
+								<div style="height: calc(100% - var(--stock-title-height)); overflow: auto;">
+									<div class="d-flex justify-content-between col-12 mt-4">
+										<div id="stock-table-container" style="width: 50%;">
+											<h6 id="stock-table-property-title" class="font-weight-semi-bold"></h6>
+											<div class="card p-4">
+												<table class="table m-0 text-center">
+													<thead>
+														<tr>
+															<th id="stock-page-th-name" class="border-top-0 pt-0 text-left text-nowrap"></th>
+															<th id="stock-page-th-weight" class="border-top-0 pt-0 text-nowrap"></th>
+															<th id="stock-page-th-value" class="border-top-0 pt-0 text-nowrap"></th>
+															<th id="stock-page-th-amount" class="border-top-0 pt-0 text-nowrap"></th>
+														</tr>
+													</thead>
+													<tbody id="stock-table-body">
+														
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<div id="stock-player-table-container" style="width: 48%;">
+											<h6 id="stock-table-player-title" class="font-weight-semi-bold"></h6>
+											<div class="card p-4">
+												<table class="table m-0 text-center">
+													<thead>
+														<tr>
+															<th id="stock-player-page-th-name" class="border-top-0 pt-0 text-left text-nowrap"></th>
+															<th id="stock-player-page-th-weight" class="border-top-0 pt-0 text-nowrap"></th>
+															<th id="stock-player-page-th-amount" class="border-top-0 pt-0 text-nowrap"></th>
+														</tr>
+													</thead>
+													<tbody id="stock-player-table-body">
+														
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<script src="lang/br.js" type="text/javascript"></script>
+		<script src="lang/en.js" type="text/javascript"></script>
+		<script src="panel.js" type="text/javascript"></script>
+	</body>
+</html>

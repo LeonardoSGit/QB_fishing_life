@@ -1,0 +1,30 @@
+.backgound-theme {
+	background-color: #222222df;
+}
+
+.card-theme {
+    background-color: #2f2f2f;
+    border: 1px solid rgba(250, 250, 250, 0.125);
+}
+
+.card-featured-theme {
+    background-color: rgba(250, 250, 250, 0.03);
+}
+
+.bank-money-title, .bank-loan-title {
+    color: #e1e1e1;
+}
+
+.sidebar-navigation {
+	background-color: #3b3b3b;
+}
+
+.sidebar-navigation ul li .tooltip {
+	background-color: #3b3b3b;
+    border: 1px solid rgba(250, 250, 250, 0.085);
+}
+
+.vt-card {
+    background-color: #222222df;
+    color: #e1e1e1;
+}

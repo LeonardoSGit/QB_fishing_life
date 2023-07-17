@@ -1,0 +1,446 @@
+:root {
+	--primary: #007bff;
+	--primary-hover: #0069d9;
+	--danger: #dc3545;
+	--success: #28a745;
+}
+
+body {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: #00000000 !important;
+    font-family: 'Montserrat' !important;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 400;
+    line-height: 1.2;
+    color: inherit;
+}
+
+.main {
+	width: 1280px;
+	height: 726px;
+	border-radius: 0px 20px 20px 0px;
+	display: grid;
+	grid-template-columns: 80px 1200px;
+}
+
+.backdrop-blur {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: -1;
+	width: 100vw;
+	height: 100vh;
+	background-color: #000;
+	opacity: 0.3;
+}
+
+.card-centering {
+    min-height: 120px;
+    display: flex;
+    justify-content: center;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+	margin-bottom: 0.5rem;
+	font-family: Montserrat,Georgia,'Times New Roman',Times,serif;
+	font-weight: 400;
+	line-height: 1.2;
+	color: inherit;
+}
+
+/*===========================*/
+/*========== FONTS ==========*/
+/*===========================*/
+
+.font-small-1 {
+	font-size: 0.7rem !important;
+}
+
+.font-small-2 {
+	font-size: 0.8rem !important;
+}
+
+.font-small-3 {
+	font-size: 0.9rem !important;
+}
+
+.font-medium-1 {
+	font-size: 1.1rem !important;
+}
+
+.font-medium-2 {
+	font-size: 1.2rem !important;
+}
+
+.font-medium-3 {
+	font-size: 1.3rem !important;
+}
+
+.font-medium-4 {
+	font-size: 1.4rem !important;
+}
+
+.font-medium-5 {
+	font-size: 1.5rem !important;
+}
+
+.font-large-1 {
+	font-size: 2rem !important;
+}
+
+.font-large-2 {
+	font-size: 3rem !important;
+}
+
+.font-large-3 {
+	font-size: 4rem !important;
+}
+
+.font-large-4 {
+	font-size: 5rem !important;
+}
+
+.font-large-5 {
+	font-size: 6rem !important;
+}
+
+/*===========================*/
+/*========== COLORS =========*/
+/*===========================*/
+
+.blue {
+    color: #00B5B8!important;
+}
+
+.bg-amber {
+    background-color: #FFC107!important;
+}
+
+.amber.accent-4 {
+    color: #FFAB00!important;
+}
+
+.blue-grey.lighten-3 {
+    color: #B0BEC5 !important; 
+}
+
+.bronze {
+	color: #9e5a00;
+}
+
+.info {
+    color: #2DCEE3!important;
+}
+
+.checkicon {
+	color: green;
+	font-size: 19px
+}
+
+.redicon {
+	color: red;
+	font-size: 19px
+}
+
+.blueicon {
+	color: #1565C0;
+	font-size: 19px
+}
+
+.warningicon {
+	color: #FFC107;
+	font-size: 19px
+}
+
+.dropdown-options-svg {
+	width: 24px;
+	height: 24px;
+	fill: var(--primary);
+}
+
+.dropdown-options-svg:hover {
+	fill: var(--primary-hover);
+	cursor: pointer;
+}
+
+.list li {
+	list-style: none;
+	padding: 10px;
+	margin-bottom: 12px;
+	border-radius: 5px;
+}
+
+/*=========================*/
+/*========= PAGES =========*/
+/*=========================*/
+
+.container-pages {
+	height: 726px;
+	position: relative;
+}
+
+.pages {
+	display: none;
+	padding: 20px 20px 0px;
+	height: 100%;
+}
+
+/*===========================*/
+/*========= SIDEBAR =========*/
+/*===========================*/
+
+.sidebar-navigation {
+	display: inline-block;
+	height: 100%;
+	width: 80px;
+}
+
+.sidebar-navigation ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-family: "Lato", sans-serif;
+	line-height: 1;
+	text-align: center;
+	color: white;
+	height: 100%;
+}
+
+.sidebar-navigation ul li {
+	cursor: pointer;
+	transition: all ease-out 120ms;
+	height: 66px;
+}
+
+.sidebar-navigation ul li i {
+	display: block;
+	font-size: 24px;
+	transition: all ease 450ms;
+	width: 100%;
+}
+
+.sidebar-navigation ul li .tooltip {
+	display: inline-block;
+	position: relative;
+	background-color: #313443;
+	padding: 8px 15px;
+	border-radius: 3px;
+	margin-top: -46px;
+	left: 90px;
+	opacity: 0;
+	visibility: hidden;
+	font-size: 12px;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
+}
+
+.sidebar-navigation ul li .tooltip:before {
+	content: "";
+	display: block;
+	position: absolute;
+	left: -4px;
+	top: 11px;
+	transform: rotate(45deg);
+	width: 10px;
+	height: 10px;
+	background-color: inherit;
+}
+
+.sidebar-navigation ul li:hover {
+	background-color: #22252e;
+}
+
+.sidebar-navigation ul li:hover .tooltip {
+	display: flex;
+	width: fit-content;
+	visibility: visible;
+	opacity: 1;
+	transition: all ease 450ms;
+}
+
+.sidebar-navigation ul li.active {
+	background-color: #22252e;
+}
+
+.sidebar-navigation ul li.active i {
+	color: #98d7ec;
+}
+
+.sidebar-navigation li i {
+	padding: 20px 0px;
+}
+
+.sidebar-navigation li img {
+	height: 66px;
+	width: 66px;
+}
+
+/*==========================*/
+/*======= NAVIGATION =======*/
+/*==========================*/
+
+.navigation-tabs-container {
+	display: flex;
+}
+
+.navigation-tabs-container h5 {
+	margin-bottom: 0px;
+	padding: 8px 25px;
+}
+
+.navigation-tabs-container .navigation-tab:hover {
+	cursor: pointer;
+}
+
+.navigation-tabs-container .navigation-tab:hover h5 {
+	color: var(--primary);
+	transition: all ease-out 120ms;
+}
+
+.navigation-tabs-container .navigation-tab:hover .border-selected {
+	width: 100%;
+	transition: all ease-out 120ms;
+}
+
+.navigation-tabs-container .navigation-tab:hover .border-default {
+	width: 0%;
+	transition: all ease-out 120ms;
+}
+
+.navigation-tabs-container .selected .border-default {
+	width: 0%;
+}
+
+.navigation-tabs-container .selected .border-selected {
+	width: 100%;
+}
+
+.navigation-tabs-container .selected h5 {
+	color: var(--primary) !important;
+	margin: 0px !important;
+}
+
+.navigation-tabs-container .border-selected {
+	width: 0%;
+	height: 5px;
+	background: var(--primary);
+}
+
+.navigation-tabs-container .border-default {
+	width: 100%;
+	height: 1px;
+	margin-top: 2px;
+	background: #707070;
+}
+
+/*==========================*/
+/*====== PLAYER INFO ======*/
+/*==========================*/
+
+.player-info-container {
+	position: absolute;
+	height: 0px;
+	right: 25px;
+	top: 40px;
+}
+
+.player-info-item {
+	font-size: 18px;
+	font-weight: bold;
+}
+
+/*==========================*/
+/*======= DELIVERIES =======*/
+/*==========================*/
+
+.card-line {
+	height: 1px;
+	background-color: rgba(0,0,0,.1);
+}
+
+.deliveries-page .card-body {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+}
+
+.deliveries-page .view-location-container > a:hover {
+	cursor: pointer;
+	text-decoration: none;
+}
+
+/*==========================*/
+/*======= STORE =======*/
+/*==========================*/
+
+.store-page .card-body {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+}
+
+/*==========================*/
+/*===== OWNED VEHICLES =====*/
+/*==========================*/
+
+.img-width {
+	max-width: 50px;
+}
+
+.vehicle-name {
+	width: 70px;
+	white-space: nowrap;
+}
+
+/*==========================*/
+/*========== BANK ==========*/
+/*==========================*/
+
+.bank-money-title {
+    font-weight: 900;
+    font-family: 'Montserrat';
+}
+
+.loans-table-container tr th, .loans-table-container tr td {
+    font-weight: 100 !important;
+    font-size: 14px !important;
+}
+
+.loans-table-container tr th {
+    border-top: 0 !important;
+}
+
+.loans-table-container tr th:first-child, .loans-table-container tr td:first-child {
+    text-align: left;
+}
+
+.loans-table-container tr th, .loans-table-container tr td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.loans-table-container tr th:last-child, .loans-table-container tr td:last-child {
+    text-align: right;
+}
+
+/*=============================*/
+/*========= SCROLLBAR =========*/
+/*=============================*/
+
+::-webkit-scrollbar {
+	display: none;
+}
+
+body {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
