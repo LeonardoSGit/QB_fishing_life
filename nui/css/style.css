@@ -28,17 +28,6 @@ body {
 	grid-template-columns: 80px 1200px;
 }
 
-.backdrop-blur {
-	position: fixed;
-	top: 0;
-	left: 0;
-	z-index: -1;
-	width: 100vw;
-	height: 100vh;
-	background-color: #000;
-	opacity: 0.3;
-}
-
 .card-centering {
     min-height: 120px;
     display: flex;

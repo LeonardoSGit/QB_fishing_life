@@ -9,29 +9,24 @@ lua54 'yes'
 escrow_ignore {
 	'config.lua',
 	'client.lua',
-	'utils.lua',
 	'server_utils.lua',
-	'framework.lua',
 	'lang/*.lua',
 }
 
 client_scripts {
-	"lang/*.lua",
-	
-	"config.lua",
-	"utils.lua",
 	"client.lua",
 }
 
 server_scripts {
 	"@mysql-async/lib/MySQL.lua",
-	
-	"lang/*.lua",
 
-	"config.lua",
 	"server_utils.lua",
-	"framework.lua",
 	"server.lua"
+}
+
+shared_scripts {
+	"lang/*.lua",
+	"config.lua",
 }
 
 files {

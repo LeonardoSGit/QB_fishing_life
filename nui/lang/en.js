@@ -10,6 +10,8 @@ Lang['en'] = {
 	sidebar_close: 'Close',
 	weight_unit: 'kg',
 
+	confirmation_modal_sell_vehicle: 'Are you sure you want to sell this vehicle?',
+
 	statistics_page_title: 'Statistics',
 	statistics_page_desc: 'Statistics of your truck company',
 	

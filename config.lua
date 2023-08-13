@@ -1,24 +1,10 @@
 Config = {}
 
-Config.lang = "en"								-- Set the file language [en/br]
-
-Config.Framework = {							-- QBCore configs
-	['account_fisher'] = 'bank',				-- Change here the account that should be used with fisher expenses
-}
-
-Config.format = {
-	['currency'] = 'USD',						-- This is the currency format, so that your currency symbol appears correctly [Examples: BRL, USD] (https://taxsummaries.pwc.com/glossary/currency-codes)
-	['location'] = 'en-US'						-- This is the location of your country, to format the decimal places according to your standard [Examples: pt-BR, en-US] (http://www.lingoes.net/en/translator/langcode.htm)
+Config.account = {								-- Account configs
+	['fisher'] = 'bank',						-- Change here the account that should be used with fisher expenses
 }
 
 Config.job = "false"							-- Required job name to open the menu (set as false to disable the permission)
-Config.debugJob = false							-- Enable this to see your job on server console (not F8)
-
-Config.vehicle_blips = {						-- Configure here the vehicle blips created in the script
-	['sprite'] = 477,							-- Vehicle blip sprite when the vehicle is spawned
-	['color'] = 26								-- Vehicle blip color
-}
-
 
 -- Here are the places where the person can open the business menu
 -- You can add as many locations as you like, just use the location already created as an example
@@ -95,7 +81,7 @@ Config.available_contracts = {
 	}
 }
 
-Config.vehicle_sell_price_multiplier = 0.7		-- Value you receive when selling the used vehicle
+Config.vehicle_sell_price_multiplier = 0.7		-- Value you receive when selling the used item
 Config.available_items_store = {
 	['vehicle'] = {
 		['weevil'] = {
@@ -126,6 +112,11 @@ Config.available_items_store = {
 			['location'] = {854.28, -898.53, 25.35}
 		},
 	}
+}
+
+Config.vehicle_blips = {						-- Configure here the vehicle blips created in the script
+	['sprite'] = 477,							-- Vehicle blip sprite when the vehicle is spawned
+	['color'] = 26								-- Vehicle blip color
 }
 
 --[[
