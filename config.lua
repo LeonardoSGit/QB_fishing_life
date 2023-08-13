@@ -18,6 +18,12 @@ Config.fishing_locations = {
 		['boat_garage_locations'] = {						-- Garage coordinates, where the business vehicles will spawn (vector4)
 			{856.32, -895.12, 25.41}--{854.29, -899.33, 25.35, 269.83},
 		--{854.43, -905.59, 25.35, 273.32},
+		},
+		['blips'] = {							-- Create the blips on map
+			['id'] = 410,						-- Blip ID [Set this value 0 to dont have blip]
+			['name'] = "Fishing job",			-- Blip Name
+			['color'] = 3,						-- Blip Color
+			['scale'] = 0.6,					-- Blip Scale
 		}
 	},
 	["fishing_2"] = {
@@ -25,6 +31,12 @@ Config.fishing_locations = {
 		['garage_locations'] = {
 			{854.29, -899.33, 25.35, 269.83},
 			{854.43, -905.59, 25.35, 273.32},
+		},
+		['blips'] = {							-- Create the blips on map
+			['id'] = 410,						-- Blip ID [Set this value 0 to dont have blip]
+			['name'] = "Fishing job",			-- Blip Name
+			['color'] = 3,						-- Blip Color
+			['scale'] = 0.6,					-- Blip Scale
 		}
 	},
 }

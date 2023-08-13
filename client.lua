@@ -178,7 +178,7 @@ end)
 
 RegisterNetEvent('lc_fishing_life:cancelContract')
 AddEventHandler('lc_fishing_life:cancelContract', function()
-	RemoveBlip(route_blip)
+	Utils.Blips.removeBlip(route_blip)
 end)
 
 RegisterNetEvent('lc_fishing_life:viewLocation')
@@ -244,7 +244,7 @@ AddEventHandler('lc_fishing_life:spawnVehicle', function(vehicle_data,garage_to_
 					local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
 					if distance <= 20.0 then
 						timer = 2
-						Utils.Markers.drawMarker(21,x,y,z,1.0)
+						Utils.Markers.drawMarker(36,x,y,z,1.0) -- TODO: Id 36 se for carro, id 35 se for barco
 						if distance <= 2.0 then
 							Utils.Markers.drawText2D(Utils.translate('press_e_to_store_vehicle'), 8,0.5,0.95,0.50,255,255,255,180)
 							if IsControlJustPressed(0,38) and IsEntityAVehicle(vehicle) then
@@ -303,6 +303,14 @@ Citizen.CreateThread(function()
 			update_vehicle_status = update_vehicle_status - 1
 		end
 		Citizen.Wait(timer)
+	end
+end)
+
+Citizen.CreateThread(function()
+	for _,fishing_location_data in pairs(Config.fishing_locations) do
+		local x,y,z = table.unpack(fishing_location_data.menu_location)
+		local blips = fishing_location_data.blips
+		Utils.Blips.createBlipForCoords(x,y,z,blips.id,blips.color,blips.name,blips.scale,false)
 	end
 end)
 
