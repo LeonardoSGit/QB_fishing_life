@@ -38,6 +38,7 @@ window.addEventListener('message', function (event) {
 		let owned_vehicles = item.data.owned_vehicles
 		let owned_properties = item.data.owned_properties
 		let available_items_store = config.available_items_store;
+		let upgrades = config.upgrades
 
 		if (item.isUpdate != true) {
 			// Open on first time
@@ -60,12 +61,14 @@ window.addEventListener('message', function (event) {
 		renderOwnedVehiclesPage(owned_vehicles,available_items_store);
 		renderOwnedPropertiesPage(owned_properties,available_items_store);
 		renderBankPage(fishing_life_users, item, fishing_life_loans);
+		renderUpgradesPage(upgrades,fishing_life_users);
 
 		createListeners();
 	} else if(item.openPropertyUI){
+
+		config = item.data.config;
 		//$(".main").css("display", "none");
-		console.log(item)
-		renderStockPage()
+		renderStockPage(item.property)
 		$(document).ready(function(){
 			$("#stock-modal").modal({show: true});
 		});
@@ -106,6 +109,19 @@ function renderStaticTexts() {
 	$('#new-contracts-text').text(Lang[lang]['deliveries_contracts_time'].format(config.contracts.time_to_new_contracts));
 
 	
+	// Upgrades page
+	$('#upgrades-page-title').text(Lang[lang]['upgrades_page_title']);
+	$('#upgrades-page-desc').text(Lang[lang]['upgrades_page_desc']);
+	$('#stock-upgrade-desc').text(Lang[lang]['upgrade_page_stock_desc']);
+	$('#vehicles-upgrade-desc').text(Lang[lang]['upgrade_page_vehicles_desc']);
+	$('#boats-upgrade-desc').text(Lang[lang]['upgrade_page_boats_desc']);
+	$('#properties-upgrade-desc').text(Lang[lang]['upgrade_page_properties_desc']);
+	$('#rods-upgrade-desc').text(Lang[lang]['upgrade_page_rods_desc']);
+	$('#lake-upgrade-desc').text(Lang[lang]['upgrade_page_lake_desc']);
+	$('#swan-upgrade-desc').text(Lang[lang]['upgrade_page_swan_desc']);
+	$('#sea-upgrade-desc').text(Lang[lang]['upgrade_page_sea_desc']);
+
+
 	// Store page
 	$('#store-title-div').html(`
 		<h4 class="text-uppercase">${Lang[lang]['store_page_title']}</h4>
@@ -174,7 +190,7 @@ function renderStaticTexts() {
 			<i class="fas fa-swimmer"></i>
 			<span class="tooltip">${Lang[lang]['sidebar_dives']}</span>
 		</li>
-		<li onclick="openPage(3)">
+		<li onclick="openPage('upgrades','stock-upgrades')">
 			<i class="fas fa-trophy"></i>
 			<span class="tooltip">Habilidades</span>
 		</li>
@@ -211,6 +227,7 @@ function renderStaticTexts() {
 	$('.navigation-tabs-container').empty();
 	// $('#navigation-tab-farms').append(getTabHTML('farms'));
 	$('#store-navigation-tab').append(getStoreTabHTML());
+	$('#navigation-tab-upgrades').append(getUpgradesTabHTML());
 	$('#owned-vehicle-navigation-tab').append(getOwnedVehicleTabHTML());
 }
 
@@ -626,6 +643,8 @@ function renderOwnedPropertiesPage(owned_properties,properties) {
 
 function renderStockPage(property){
 	// stock property page modal
+	var max_stock  = 100 //TODO UPGRADES 
+	let stock_capacity_percent = numberFormat((property.stock_amount * 100)/max_stock,1);
 	$('#owned-property-title-div').html(`
 		<h4 class="text-uppercase">${Lang[lang]['stock_title']}</h4>
 		<p>${Lang[lang]['stock_page_desc']}</p>
@@ -658,19 +677,11 @@ function renderStockPage(property){
 
 		</div>
 	`);
-	$('#input-export-stock-select-vehicle').empty();
-	$('#input-export-stock-select-vehicle').append(`<option value="" selected disabled>${Lang[lang]['stock_page_modal_placeholder_vehicle']}</option>`);
-	for (const vehicle of factory_vehicles) {
-		$('#input-export-stock-select-vehicle').append(`<option vehicle_id="${vehicle.id}" trunk="${config.vehicles[vehicle.vehicle].trunk}">${config.vehicles[vehicle.vehicle].name} (${config.vehicles[vehicle.vehicle].trunk} ${Lang[lang]['weight_unit']})</option>`);
-	}
-	if (item.data.last_vehicle && item.data.last_vehicle.network_id) {
-		$('#input-export-stock-select-vehicle').append(`<option vehicle_id="spawned_from_world" trunk="${item.data.last_vehicle.vehicle_data.trunk}">${item.data.last_vehicle.vehicle_data.name} (${item.data.last_vehicle.vehicle_data.trunk} ${Lang[lang]['weight_unit']})</option>`);
-	}
 	$('#input-export-stock-select-item').empty();
 	$(`#stock-button-export`).click({factory_stock: property.stock, relationship_upgrade: property.relationship_upgrade}, openExportStockModal);
 
 	$('#stock-table-body').empty();
-	let upgrade = config.factory.upgrades.relationship[property.relationship_upgrade-1]
+	/*let upgrade = config.factory.upgrades.relationship[property.relationship_upgrade-1]
 	if (Object.keys(arr_stock).length > 0) {
 		arr_stock = Object.keys(arr_stock).sort().reduce(
 			(obj, key) => { 
@@ -723,8 +734,21 @@ function renderStockPage(property){
 			</tr>
 		`);
 	}
+*/
 
+}
 
+function renderUpgradesPage(upgrades,user){ 
+	$('.upgrade-list').empty();
+	let level = 1
+	for (const upgrade_type in upgrades) {
+		level = 1
+		for (const upgrade of upgrades[upgrade_type]) {
+			let current_level = user[upgrade_type+'_upgrade']
+			$('#'+upgrade_type+'-upgrades-list').append(getUpgradeItemHTML(upgrade,upgrade_type,level,current_level));
+			level++;
+		}
+	}
 }
 
 function renderBankPage(fishing_life_users, item, fishing_life_loans) {
@@ -795,6 +819,17 @@ function getStoreTabHTML() {
 	+ getTabHTML('store','store-property',Lang[lang]['navigation_tab_store_property'])
 }
 
+
+function getUpgradesTabHTML() {
+	return getTabHTML('upgrades','upgrades-vehicles',Lang[lang]['navigation_tab_upgrades_vehicles'],true)
+	+ getTabHTML('upgrades','upgrades-boats',Lang[lang]['navigation_tab_upgrades_boats'])
+	+ getTabHTML('upgrades','upgrades-properties',Lang[lang]['navigation_tab_upgrades_properties'])
+	+ getTabHTML('upgrades','upgrades-rods',Lang[lang]['navigation_tab_upgrades_rods'])
+	+ getTabHTML('upgrades','upgrades-lake',Lang[lang]['navigation_tab_upgrades_lake'])
+	+ getTabHTML('upgrades','upgrades-swan',Lang[lang]['navigation_tab_upgrades_swan'])
+	+ getTabHTML('upgrades','upgrades-sea',Lang[lang]['navigation_tab_upgrades_sea'])
+}
+
 function getOwnedVehicleTabHTML() {
 	return getTabHTML('owned-vehicle','owned-vehicle',Lang[lang]['navigation_tab_owned_vehicle'],true)
 	+ getTabHTML('owned-vehicle','owned-boat',Lang[lang]['navigation_tab_owned_boat'])
@@ -815,6 +850,36 @@ function getTabHTML(page,tab,tab_title,selected) {
 		</div>
 	</div>`
 }
+
+function getUpgradeItemHTML(upgrade,upgrade_type,level,current_level) {
+	current_level++;
+	let upgrade_button = `<button style="height:38px;" class="btn btn-primary btn-block" onclick="buyUpgrade('${upgrade_type}',${level})">${currencyFormat(upgrade.price,0)}</button>`
+	if (level > current_level) {
+		upgrade_button = `<button style="height:38px;" class="btn btn-secondary btn-block"><i class="fa-solid fa-lock" disabled></i></button>`
+	} else if (level < current_level) {
+		upgrade_button = `<button style="height:38px;" class="btn btn-outline-success btn-block"><i class="fa-solid fa-check"></i></button>`
+	}
+	let upgrade_description = Lang[lang]['upgrade_page_' + upgrade_type + '_level'].format(upgrade.level_reward)
+	if (upgrade_type == 'stock') {
+		upgrade_description = Lang[lang]['upgrade_page_' + upgrade_type + '_level'].format(upgrade.level_reward,upgrade.trademarket_reward)
+	}
+	return `
+		<li class="d-flex card-theme align-items-center">
+			<img style="width: 8%;" src="${upgrade.icon}">
+			<div style="width: 20%;" class="ml-2">
+				<small class="text-black-50">${Lang[lang]['upgrade_page_' + upgrade_type]}</small>
+				<h4 class="font-weight-semi-bold">${Lang[lang]['level_abbreviate']}${level}</h4>
+			</div>
+			<div style="width: 55%;">
+				<span class="text-success">${upgrade_description}</span>
+			</div>
+			<div style="width: 15%;">
+				${upgrade_button}
+			</div>
+		</li>
+	`
+}
+
 /*=================
 	CALLBACKS
 =================*/

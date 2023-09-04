@@ -42,6 +42,7 @@ AddEventHandler('qb_fishing_life:setPropertiesBlips', function(data)
 			for k,property in pairs(data) do
 				if(property.user_id == property.original_user_id) then
 					local x,y,z = table.unpack(Config.available_items_store.property[property.property].location)
+					print_table(Config.available_items_store.property[property.property].location)
 					local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
 					if not menu_active and distance <= 20.0 then
 						timer = 2
@@ -77,10 +78,11 @@ end)
 
 
 RegisterNetEvent('qb_fishing_life:openProperty')
-AddEventHandler('qb_fishing_life:openProperty', function(property)
+AddEventHandler('qb_fishing_life:openProperty', function(data,property)
 	SendNUIMessage({ 
 		openPropertyUI = true,
 		property = property,
+		data = data,
 		resourceName = GetCurrentResourceName()
 	})
 end)

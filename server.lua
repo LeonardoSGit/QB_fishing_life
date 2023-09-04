@@ -71,6 +71,14 @@ Citizen.CreateThread(function()
 		MySQL_Sync_execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_life_users` (
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
+				`stock_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`boats_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`vehicles_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`properties_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`rods_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`sea_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`lake_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`swan_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`money` INT(11) NOT NULL DEFAULT '0',
 				`exp` INT(11) NOT NULL DEFAULT '0',
 				`skill_points` INT(11) NOT NULL DEFAULT '0',
@@ -756,6 +764,7 @@ function openUI(source,key, isUpdate)
 		query.config.loans = deepcopy(Config.loans.amount)
 		query.config.contracts = deepcopy(Config.available_contracts.definitions)
 		query.config.available_items_store = deepcopy(Config.available_items_store)
+		query.config.upgrades = deepcopy(Config.upgrades)
 		-- query.config.dealership = deepcopy(Config.dealership)
 
 		-- Busca outras variaveis
@@ -770,12 +779,16 @@ end
 function openPropertyUI(source,property,user_id)
 
 	-- Busca o stock
+	local data = {}
 	local sql = "SELECT stock FROM `fishing_life_properties` WHERE property = @property and user_id = @user_id";		
 	local query = MySQL_Sync_fetchAll(sql,{['@property'] = property.property ,['@user_id'] = user_id})[1];
+	data.config = {}
+	data.config.lang = deepcopy(Config.lang)
+	data.config.format = deepcopy(Config.format)
 	property.stock =  json.decode(query.stock)
 	property.stock_amount = getStockAmount(property.stock)
 	-- Envia pro front-end
-	TriggerClientEvent("qb_fishing_life:openProperty",source, property)
+	TriggerClientEvent("qb_fishing_life:openProperty",source, data, property)
 end
 
 function getStockAmount(arr_stock)

@@ -104,7 +104,8 @@ Config.available_items_store = {
 			['price'] = 3100,
 			['image'] = 'images/vehicles/rubble.png',
 			['repair_price'] = 400,
-			['refuel_price'] = 10
+			['refuel_price'] = 10,
+			['level_required'] = 1
 		},
 	},
 	['boat'] = {
@@ -114,7 +115,8 @@ Config.available_items_store = {
 			['price'] = 3100,
 			['image'] = 'images/vehicles/rubble.png',
 			['repair_price'] = 400,
-			['refuel_price'] = 10
+			['refuel_price'] = 10,
+			['level_required'] = 1
 		},
 	},
 	['property'] = {
@@ -123,9 +125,91 @@ Config.available_items_store = {
 			['price'] = 3100,
 			['warehouse_capacity'] = 100,
 			['image'] = 'images/vehicles/rubble.png',
-			['location'] = {854.28, -898.53, 25.35}
+			['location'] = {854.28, -898.53, 25.35},
+			['level_required'] = 1
 		},
 	}
+}
+
+Config.upgrades = {
+    ['stock'] = {
+        { points_required = 1, level_reward = 100, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 200, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 300, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 400, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 600, icon = 'fuel.png' },
+    },
+    ['boats'] = {
+        { points_required = 1, level_reward = 10, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 20, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 30, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 40, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 60, icon = 'fuel.png' },
+    },
+    ['vehicles'] = {
+        { points_required = 1, level_reward = 2, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 4, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 6, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 8, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 12, icon = 'fuel.png' },
+    },
+    ['properties'] = {
+        { points_required = 1, level_reward = 2, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 4, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 6, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 8, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 12, icon = 'fuel.png' },
+    },
+    ['rods'] = {
+        { points_required = 1, level_reward = 2, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 4, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 6, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 8, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 12, icon = 'fuel.png' },
+    },
+    ['lake'] = {
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+    },
+    ['sea'] = {
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+    },
+    ['swan'] = {
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'fuel.png' },
+    },
+}
+
+
+Config.fishs = {
+	['tuna'] = {
+	}
+}
+
+Config.rods = {
+	['1'] = { 'tuna' }
+}
+
+Config.swan = {
+	['1'] = { 'tuna' }
+}
+
+Config.sea = {
+	['1'] = { 'tuna' }
+}
+
+Config.lake = {
+	['1'] = { 'tuna' }
 }
 
 --[[

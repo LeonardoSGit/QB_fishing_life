@@ -58,6 +58,50 @@ Lang['en'] = {
 	str_more_than: "Must be greater than or equal to {0}",
 	str_less_than: "Must be less than or equal to {0}",
 
+
+	upgrades_page_title: "Skills",
+	upgrades_page_desc: "Use your skill point to buy new skills and improve your experience fishihg",
+
+	upgrade_page_stock: 'Stock capacity',
+	upgrade_page_stock_desc: 'Upgrade your stock capacity to have more room to store your fishs.',
+	upgrade_page_stock_level: '+{0} stock capacity in your property',
+
+	upgrade_page_vehicles: 'Vehicles',
+	upgrade_page_vehicles_desc: 'Upgrade your garage capacity to have more trucks to transport your products.',
+	upgrade_page_vehicles_level: '+{0} vehicle slots in your garage<BR>+ Unlocks new vehicles to purchase',
+
+	upgrade_page_boats: 'Boats',
+	upgrade_page_boats_desc: 'Upgrade your garage capacity to have more boats to transport your products.',
+	upgrade_page_boats_level: '+{0} boat slots in your garage<BR>+ Unlocks new boats to purchase',
+
+	upgrade_page_properties: 'Properties',
+	upgrade_page_properties_desc: 'Upgrade your properties.',
+	upgrade_page_properties_level: 'Unlocks new properties to purchase',
+
+	upgrade_page_rods: 'Rod',
+	upgrade_page_rods_desc: 'Upgrade your rods to have a better way to catch the fishs.',
+	upgrade_page_rods_level: 'Unlocks new rods',
+
+	upgrade_page_lake: 'Lake',
+	upgrade_page_lake_desc: 'Upgrade your lakes to have more types of fish to fish.',
+	upgrade_page_lake_level: 'Unlocks new fishs on the lake',
+
+	upgrade_page_swan: 'swan',
+	upgrade_page_swan_desc: 'Upgrade your swans to have more types of fish to fish.',
+	upgrade_page_swan_level: 'Unlocks new fishs on the swan',
+
+	upgrade_page_sea: 'Sea',
+	upgrade_page_sea_desc: 'Upgrade your seas to have more types of fish to fish.',
+	upgrade_page_sea_level: 'Unlocks new fishs on the sea',
+	navigation_tab_upgrades_vehicles: "Vehicles",
+	navigation_tab_upgrades_boats: "Vehicles",
+	navigation_tab_upgrades_properties: "Properties",
+	navigation_tab_upgrades_rods: "Rods",
+	navigation_tab_upgrades_lake: "Lake",
+	navigation_tab_upgrades_swan: "Swan",
+	navigation_tab_upgrades_sea: "Sea",
+
+
 	store_page_title: 'Store',
 	store_page_desc: 'Buy your cars, boats and properties for your deliveries',
 	store_buy_vehicle: 'Buy vehicle',
