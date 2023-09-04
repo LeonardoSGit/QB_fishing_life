@@ -1,6 +1,8 @@
 if not Lang then Lang = {} end
 Lang['en'] = {
 	['open'] = "Press ~y~E~w~ to open",
+    ['open_target'] = "Open fishing dashboard",
+    ['you_died'] = "You died and lost your vehicle",
 	['insufficient_money'] = "Insufficient money",
 	['invalid_value'] = "Invalid value",
 
@@ -26,11 +28,11 @@ Lang['en'] = {
 	['no_loan'] = "You cannot take this loan",
 	['loan_paid'] = "Loan paid",
 	
-	['occupied_places'] = "Occupied garage",
+	['occupied_places'] = "Your garage is occupied, consider removing any obstructions that are blocking the vehicle parking space",
 	['vehicle_blip'] = "Vehicle",
 	['vehicle_plate'] = "F",
 	['press_e_to_store_vehicle'] = '~w~Press ~g~[E]~w~ to store the ~b~vehicle~w~.',
-	['press_e_to_collect_products'] = '~w~Press ~g~[E]~w~ collect the ~b~products~w~.',
+	['press_e_to_collect_products'] = '~w~Press ~g~[E]~w~ collect the ~b~products~w~.', -- TODO: remover os caras daqui que não estão sendo usados
 	['press_e_to_export_products'] = '~w~Press ~g~[E]~w~ export the ~b~products~w~.',
 	['products_collected'] = 'You have collected the products, now bring the vehicle back to your garage',
 	['products_exported'] = 'You have exported the products, now bring the vehicle back to your garage',
@@ -51,6 +53,7 @@ Lang['en'] = {
 	['vehicle_spawned'] = "Your vehicle is in your garage",
 	['vehicle_capacity_full'] = "Your vehicles capacity is full",
 	['vehicle_owned_name'] = "Owned vehicle",
+	['vehicle_destroyed'] = "Your vehicle has been destroyed",
 
 	['logs_date'] = "Date",
 	['logs_hour'] = "Time",

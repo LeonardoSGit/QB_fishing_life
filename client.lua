@@ -1,41 +1,51 @@
+Utils = exports['lc_utils']:GetUtils()
 local menu_active = false
 local cooldown = nil
-local fishing_location_id;
+local current_fishing_location_id;
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- LOCATIONS
 -----------------------------------------------------------------------------------------------------------------------------------------	
 
 -- Main menu locations
-Citizen.CreateThread(function()
-	SetNuiFocus(false,false)
-	local timer = 2
-	while true do
-		timer = 3000
-		for k,mark in pairs(Config.fishing_locations) do
-			local x,y,z = table.unpack(mark.menu_location)
-			local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
-			if not menu_active and distance <= 20.0 then
-				timer = 2
-				DrawMarker(21,x,y,z-0.6,0,0,0,0.0,0,0,0.5,0.5,0.4,255,0,0,50,0,0,0,1)
-				if distance <= 2.0 then
-					DrawText3D2(x,y,z-0.6, Lang[Config.lang]['open'], 0.40)
-					if IsControlJustPressed(0,38) then
-						fishing_location_id = k
-						TriggerServerEvent("qb_fishing_life:getData",fishing_location_id)
+function createMarkersThread()
+	Citizen.CreateThreadNow(function()
+		local timer = 2
+		while true do
+			timer = 3000
+			for fishing_location_id,fishing_location_data in pairs(Config.fishing_locations) do
+				if not menu_active then
+					local x,y,z = table.unpack(fishing_location_data.menu_location)
+					if Utils.Entity.isPlayerNearCoords(x,y,z,20.0) then
+						timer = 2
+						Utils.Markers.createMarkerInCoords(fishing_location_id,x,y,z,Utils.translate('open'),openFishingUiCallback)
 					end
 				end
 			end
+			Citizen.Wait(timer)
 		end
-		Citizen.Wait(timer)
-	end
-end)
+	end)
+end
+
+function createTargetsThread()
+	Citizen.CreateThreadNow(function()
+		for fishing_location_id,fishing_location_data in pairs(Config.fishing_locations) do
+			local x,y,z = table.unpack(fishing_location_data.menu_location)
+			Utils.Target.createTargetInCoords(fishing_location_id,x,y,z,openFishingUiCallback,Utils.translate('open_target'),"fas fa-fish-fins","#2986cc")
+		end
+	end)
+end
+
+function openFishingUiCallback(fishing_location_id)
+	current_fishing_location_id = fishing_location_id
+	TriggerServerEvent("lc_fishing_life:getData",current_fishing_location_id)
+end
 
 -- Properties locations
-RegisterNetEvent('qb_fishing_life:setPropertiesBlips')
-AddEventHandler('qb_fishing_life:setPropertiesBlips', function(data)
+RegisterNetEvent('lc_fishing_life:setPropertiesBlips')
+AddEventHandler('lc_fishing_life:setPropertiesBlips', function(data)
 	local user_id = data.user_id
+	-- TODO: move isso pra funcao createMarkersThread e checa se o cara é dono ao chamar o evento TriggerServerEvent("lc_fishing_life:getDataProperty",fishing_property_id) inves de fazer verificacao no client (o certo é toda verificacao importante ser no server)
 	Citizen.CreateThread(function()
-		SetNuiFocus(false,false)
 		local timer = 2
 		while true do
 			timer = 3000
@@ -46,12 +56,12 @@ AddEventHandler('qb_fishing_life:setPropertiesBlips', function(data)
 					local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
 					if not menu_active and distance <= 20.0 then
 						timer = 2
-						DrawMarker(21,x,y,z-0.6,0,0,0,0.0,0,0,0.5,0.5,0.4,255,0,0,50,0,0,0,1)
+						Utils.Markers.drawMarker(21,x,y,z,0.5)
 						if distance <= 2.0 then
-							DrawText3D2(x,y,z-0.6, Lang[Config.lang]['open'], 0.40)
+							Utils.Markers.drawText3D(x,y,z-0.6,Utils.translate('open'))
 							if IsControlJustPressed(0,38) then
 								fishing_property_id = property.property
-								TriggerServerEvent("qb_fishing_life:getDataProperty",fishing_property_id)
+								TriggerServerEvent("lc_fishing_life:getDataProperty",fishing_property_id)
 							end
 						end
 					end
@@ -62,12 +72,14 @@ AddEventHandler('qb_fishing_life:setPropertiesBlips', function(data)
 	end)
 end)
 
-RegisterNetEvent('qb_fishing_life:open')
-AddEventHandler('qb_fishing_life:open', function(data,isUpdate)
+RegisterNetEvent('lc_fishing_life:open')
+AddEventHandler('lc_fishing_life:open', function(data,isUpdate)
+	TriggerScreenblurFadeIn(1000)
 	SendNUIMessage({ 
 		openOwnerUI = true,
 		isUpdate = isUpdate,
 		data = data,
+		utils = { config = Utils.Config, lang = Utils.Lang },
 		resourceName = GetCurrentResourceName()
 	})
 	if isUpdate == false then
@@ -75,14 +87,12 @@ AddEventHandler('qb_fishing_life:open', function(data,isUpdate)
 		SetNuiFocus(true,true)
 	end
 end)
-
-
-RegisterNetEvent('qb_fishing_life:openProperty')
-AddEventHandler('qb_fishing_life:openProperty', function(data,property)
+RegisterNetEvent('lc_fishing_life:openProperty')
+AddEventHandler('lc_fishing_life:openProperty', function(property)
 	SendNUIMessage({ 
 		openPropertyUI = true,
 		property = property,
-		data = data,
+		utils = { config = Utils.Config, lang = Utils.Lang },
 		resourceName = GetCurrentResourceName()
 	})
 end)
@@ -90,25 +100,6 @@ end)
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- CALLBACKS
 -----------------------------------------------------------------------------------------------------------------------------------------
-ServerCallbacks = {}
-CurrentRequestId = 0
-RegisterNetEvent('qb_fishing_life:serverCallback')
-AddEventHandler('qb_fishing_life:serverCallback', function(requestId, ...)
-	ServerCallbacks[requestId](...)
-	ServerCallbacks[requestId] = nil
-end)
-TriggerServerCallback = function(name, cb, ...)
-	ServerCallbacks[CurrentRequestId] = cb
-
-	TriggerServerEvent('qb_fishing_life:triggerServerCallback', name, CurrentRequestId, ...)
-
-	if CurrentRequestId < 65535 then
-		CurrentRequestId = CurrentRequestId + 1
-	else
-		CurrentRequestId = 0
-	end
-end
-
 RegisterNUICallback('post', function(data, cb)
 	if cooldown == nil then
 		cooldown = true
@@ -116,9 +107,9 @@ RegisterNUICallback('post', function(data, cb)
 		if data.event == "close" then
 			closeUI()
 		else
-			TriggerServerEvent('qb_fishing_life:'..data.event,fishing_location_id,data.data)
+			TriggerServerEvent('lc_fishing_life:'..data.event,current_fishing_location_id,data.data)
 		end
-		cb()
+		cb(200)
 
 		SetTimeout(500,function()
 			cooldown = nil
@@ -126,17 +117,23 @@ RegisterNUICallback('post', function(data, cb)
 	end
 end)
 
+RegisterNUICallback('close', function(data, cb)
+	closeUI()
+	cb(200)
+end)
+
+RegisterNetEvent('lc_fishing_life:closeUI')
+AddEventHandler('lc_fishing_life:closeUI', function()
+	closeUI()
+end)
+
 function closeUI()
-	fishing_id = nil
+	current_fishing_location_id = nil
 	menu_active = false
 	SetNuiFocus(false,false)
 	SendNUIMessage({ hidemenu = true })
+	TriggerScreenblurFadeOut(1000)
 end
-
-RegisterNetEvent('qb_fishing_life:closeUI')
-AddEventHandler('qb_fishing_life:closeUI', function()
-	closeUI()
-end)
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- addBlipProperty
@@ -144,21 +141,21 @@ end)
 
 Citizen.CreateThread(function()
     Wait(5000)
-    TriggerServerEvent("qb_fishing_life:getProperties")
+    TriggerServerEvent("lc_fishing_life:getProperties")
 end)
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- FUNCTIONS
 -----------------------------------------------------------------------------------------------------------------------------------------
 local route_blip
-RegisterNetEvent('qb_fishing_life:startContract')
-AddEventHandler('qb_fishing_life:startContract', function(contract_data)
+RegisterNetEvent('lc_fishing_life:startContract')
+AddEventHandler('lc_fishing_life:startContract', function(contract_data)
 	closeUI()
 	
 	contract_data.delivery_location = json.decode(contract_data.delivery_location)
 	local x,y,z = table.unpack(contract_data.delivery_location)
 
-	route_blip = addBlip(x,y,z,1,5,Lang[Config.lang]['contract_destination_blip'],1.0,true)
+	route_blip = Utils.Blips.createBlipForCoords(x,y,z,1,5,Utils.translate('contract_destination_blip'),1.0,true)
 
 	local timer
 	while DoesBlipExist(route_blip) do
@@ -166,11 +163,11 @@ AddEventHandler('qb_fishing_life:startContract', function(contract_data)
 		local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
 		if distance <= 20.0 then
 			timer = 2
-			DrawMarker(21,x,y,z-0.6,0,0,0,0.0,0,0,0.5,0.5,0.4,255,0,0,50,0,0,0,1)
+			Utils.Markers.drawMarker(21,x,y,z,0.5)
 			if distance <= 2.0 then
-				DrawText3D2(x,y,z-0.6, Lang[Config.lang]['contract_finish_delivery'], 0.40)
+				Utils.Markers.drawText3D(x,y,z-0.6,Utils.translate('contract_finish_delivery'))
 				if IsControlJustPressed(0,38) then
-					TriggerServerEvent("qb_fishing_life:finishContract")
+					TriggerServerEvent("lc_fishing_life:finishContract")
 				end
 			end
 		end
@@ -178,22 +175,23 @@ AddEventHandler('qb_fishing_life:startContract', function(contract_data)
 	end
 end)
 
-RegisterNetEvent('qb_fishing_life:cancelContract')
-AddEventHandler('qb_fishing_life:cancelContract', function()
-	RemoveBlip(route_blip)
+RegisterNetEvent('lc_fishing_life:cancelContract')
+AddEventHandler('lc_fishing_life:cancelContract', function()
+	Utils.Blips.removeBlip(route_blip)
 end)
 
-RegisterNetEvent('qb_fishing_life:viewLocation')
-AddEventHandler('qb_fishing_life:viewLocation', function(location)
+RegisterNetEvent('lc_fishing_life:viewLocation')
+AddEventHandler('lc_fishing_life:viewLocation', function(location)
 	closeUI()
 	SetNewWaypoint(location[1],location[2])
 end)
 
+local vehicle,vehicle_blip
 local update_vehicle_status = 0
-RegisterNetEvent('qb_fishing_life:spawnVehicle')
-AddEventHandler('qb_fishing_life:spawnVehicle', function(vehicle_data,garage_to_spawn)
+RegisterNetEvent('lc_fishing_life:spawnVehicle')
+AddEventHandler('lc_fishing_life:spawnVehicle', function(vehicle_data,garage_to_spawn)
 	if IsEntityAVehicle(vehicle) then
-		TriggerEvent("qb_fishing_life:Notify","negado",Lang[Config.lang]['vehicle_already_spawned'])
+		exports['lc_utils']:notify("error",Utils.translate('vehicle_already_spawned'))
 		return
 	end
 
@@ -203,10 +201,9 @@ AddEventHandler('qb_fishing_life:spawnVehicle', function(vehicle_data,garage_to_
 	local x,y,z,h
 	while i > 0 do
 		x,y,z,h = table.unpack(garage_to_spawn[i])
-		local checkPos = IsSpawnPointClear({['x']=x,['y']=y,['z']=z},3.001)
-		if checkPos == false then
+		if not Utils.Vehicles.isSpawnPointClear({['x']=x,['y']=y,['z']=z},5.001) then
 			if i <= 1 then
-				TriggerEvent("qb_fishing_life:Notify","negado",Lang[Config.lang]['occupied_places'])
+				exports['lc_utils']:notify("error",Utils.translate('occupied_places'))
 				return
 			end
 		else
@@ -214,9 +211,18 @@ AddEventHandler('qb_fishing_life:spawnVehicle', function(vehicle_data,garage_to_
 		end
 		i = i - 1
 	end
-	
-	vehicle,vehicle_blip = spawnVehicle(vehicle_data.vehicle,x,y,z,h,vehicle_data.health,vehicle_data.fuel,Config.vehicle_blips.sprite,Config.vehicle_blips.color,Lang[Config.lang]['vehicle_blip'],vehicle_data.properties)
-	TriggerEvent("qb_fishing_life:Notify","sucesso",Lang[Config.lang]['vehicle_spawned'])
+
+	vehicle_data.properties = json.decode(vehicle_data.properties)
+	Utils.Debug.printTable(vehicle_data)
+	if not vehicle_data.properties.plate then
+		vehicle_data.properties.plate = Utils.translate('vehicle_plate')..tostring(math.random(1000000, 9999999))
+	end
+	vehicle_data.properties.bodyHealth = vehicle_data.health
+	vehicle_data.properties.engineHealth = vehicle_data.health
+	vehicle_data.properties.fuelLevel = vehicle_data.fuel
+	local blip_data = { name = Utils.translate('vehicle_blip'), sprite = Config.vehicle_blips.sprite, color = Config.vehicle_blips.color }
+	vehicle,vehicle_blip = Utils.Vehicles.spawnVehicle(vehicle_data.vehicle,x,y,z,h,blip_data,vehicle_data.properties)
+	exports['lc_utils']:notify("success",Utils.translate('vehicle_spawned'))
 
 	local timer = 2
 	local engine_health = GetVehicleEngineHealth(vehicle)
@@ -226,10 +232,10 @@ AddEventHandler('qb_fishing_life:spawnVehicle', function(vehicle_data,garage_to_
 	while IsEntityAVehicle(vehicle) do
 		timer = 2000
 		local coords = GetEntityCoords(vehicle)
+		local ped = PlayerPedId()
 		if oldpos ~= nil then
 			local dist = #(coords - oldpos)
 			vehicle_data.traveled_distance = vehicle_data.traveled_distance + dist
-			local ped = PlayerPedId()
 			veh = GetVehiclePedIsIn(ped,false)
 			if veh == vehicle then
 				for k,mark in pairs(garage_to_spawn) do
@@ -237,13 +243,13 @@ AddEventHandler('qb_fishing_life:spawnVehicle', function(vehicle_data,garage_to_
 					local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
 					if distance <= 20.0 then
 						timer = 2
-						DrawMarker(21,x,y,z,0,0,0,0.0,0,0,1.0,1.0,1.0,255,0,0,50,0,0,0,1)
+						Utils.Markers.drawMarker(36,x,y,z,1.0) -- TODO: Id 36 se for carro, id 35 se for barco
 						if distance <= 2.0 then
-							drawTxt(Lang[Config.lang]['press_e_to_store_vehicle'], 8,0.5,0.95,0.50,255,255,255,180)
+							Utils.Markers.drawText2D(Utils.translate('press_e_to_store_vehicle'), 8,0.5,0.95,0.50,255,255,255,180)
 							if IsControlJustPressed(0,38) and IsEntityAVehicle(vehicle) then
-								TriggerServerEvent("qb_fishing_life:updateVehicleStatus",vehicle_data,GetVehicleEngineHealth(vehicle),GetVehicleBodyHealth(vehicle),GetVehicleFuelLevel(vehicle),GetVehicleProperties(vehicle))
-								DeleteVehicle(vehicle)
-								RemoveBlip(vehicle_blip)
+								TriggerServerEvent("lc_fishing_life:updateVehicleStatus",vehicle_data,GetVehicleEngineHealth(vehicle),GetVehicleBodyHealth(vehicle),GetVehicleFuelLevel(vehicle),Utils.Vehicles.getVehicleProperties(vehicle))
+								Utils.Vehicles.deleteVehicle(vehicle)
+								Utils.Blips.removeBlip(vehicle_blip)
 								return
 							end
 						end
@@ -256,16 +262,37 @@ AddEventHandler('qb_fishing_life:spawnVehicle', function(vehicle_data,garage_to_
 				engine_health = GetVehicleEngineHealth(vehicle)
 				body_health = GetVehicleBodyHealth(vehicle)
 				vehicle_fuel = GetVehicleFuelLevel(vehicle)
-				TriggerServerEvent("qb_fishing_life:updateVehicleStatus",vehicle_data,engine_health,body_health,vehicle_fuel,GetVehicleProperties(vehicle))
+				TriggerServerEvent("lc_fishing_life:updateVehicleStatus",vehicle_data,engine_health,body_health,vehicle_fuel,Utils.Vehicles.getVehicleProperties(vehicle))
 			end
 		end
+
+		local vehicles = { vehicle }
+		local peds = { ped }
+		local has_error, error_message = Utils.Entity.isThereSomethingWrongWithThoseBoys(vehicles,peds)
+		if has_error then
+			Utils.Framework.removeVehicleKeys(vehicle)
+			Utils.Blips.removeBlip(route_blip)
+			Utils.Blips.removeBlip(vehicle_blip)
+			PlaySoundFrontend(-1, "PROPERTY_PURCHASE", "HUD_AWARDS", false)
+			if Utils.Table.contains({'vehicle_almost_destroyed','vehicle_undriveable','ped_is_dead'}, error_message) then
+				SetVehicleEngineHealth(vehicle,-4000)
+				SetVehicleUndriveable(vehicle,true)
+			end
+			if error_message == 'ped_is_dead' then
+				exports['lc_utils']:notify("error",Utils.translate('you_died'))
+			else
+				exports['lc_utils']:notify("error",Utils.translate('vehicle_destroyed'))
+			end
+			TriggerServerEvent("lc_fishing_life:updateVehicleStatus",vehicle_data,GetVehicleEngineHealth(vehicle),GetVehicleBodyHealth(vehicle),GetVehicleFuelLevel(vehicle),Utils.Vehicles.getVehicleProperties(vehicle))
+			return
+		end
+
 		oldpos = coords
 		Citizen.Wait(timer)
 	end
-	DeleteEntity(vehicle)
-	RemoveBlip(vehicle_blip)
-	TriggerEvent("qb_fishing_life:Notify","negado",Lang[Config.lang]['vehicle_lost'])
-	TriggerServerEvent("qb_fishing_life:updateVehicleStatus",vehicle_data,engine_health,body_health,vehicle_fuel)
+	Utils.Blips.removeBlip(vehicle_blip)
+	exports['lc_utils']:notify("error",Utils.translate('vehicle_lost'))
+	TriggerServerEvent("lc_fishing_life:updateVehicleStatus",vehicle_data,engine_health,body_health,vehicle_fuel)
 end)
 
 Citizen.CreateThread(function()
@@ -278,168 +305,28 @@ Citizen.CreateThread(function()
 	end
 end)
 
------------------------------------------------------------------------------------------------------------------------------------------
--- IsSpawnPointClear
------------------------------------------------------------------------------------------------------------------------------------------
+Citizen.CreateThread(function()
+	for _,fishing_location_data in pairs(Config.fishing_locations) do
+		local x,y,z = table.unpack(fishing_location_data.menu_location)
+		local blips = fishing_location_data.blips
+		Utils.Blips.createBlipForCoords(x,y,z,blips.id,blips.color,blips.name,blips.scale,false)
+	end
+end)
 
-function EnumerateEntitiesWithinDistance(entities, isPlayerEntities, coords, maxDistance)
-	local nearbyEntities = {}
+RegisterNetEvent('lc_fishing_life:Notify')
+AddEventHandler('lc_fishing_life:Notify', function(type,message)
+	exports['lc_utils']:notify(type,message)
+end)
 
-	if coords then
-		coords = vector3(coords.x, coords.y, coords.z)
+Citizen.CreateThread(function()
+	Wait(1000)
+	SetNuiFocus(false,false)
+
+	Utils.loadLanguageFile(Lang)
+
+	if Utils.Config.custom_scripts_compatibility.target == "disabled" then
+		createMarkersThread()
 	else
-		local playerPed = PlayerPedId()
-		coords = GetEntityCoords(playerPed)
+		createTargetsThread()
 	end
-
-	for k,entity in pairs(entities) do
-		local distance = #(coords - GetEntityCoords(entity))
-
-		if distance <= maxDistance then
-			table.insert(nearbyEntities, isPlayerEntities and k or entity)
-		end
-	end
-
-	return nearbyEntities
-end
-
-local entityEnumerator = {
-	__gc = function(enum)
-		if enum.destructor and enum.handle then
-			enum.destructor(enum.handle)
-		end
-
-		enum.destructor = nil
-		enum.handle = nil
-	end
-}
-
-function EnumerateEntities(initFunc, moveFunc, disposeFunc)
-	return coroutine.wrap(function()
-		local iter, id = initFunc()
-		if not id or id == 0 then
-			disposeFunc(iter)
-			return
-		end
-
-		local enum = {handle = iter, destructor = disposeFunc}
-		setmetatable(enum, entityEnumerator)
-		local next = true
-
-		repeat
-			coroutine.yield(id)
-			next, id = moveFunc(iter)
-		until not next
-
-		enum.destructor, enum.handle = nil, nil
-		disposeFunc(iter)
-	end)
-end
-
-function EnumerateVehicles()
-	return EnumerateEntities(FindFirstVehicle, FindNextVehicle, EndFindVehicle)
-end
-
-GetVehicles = function()
-	local vehicles = {}
-
-	for vehicle in EnumerateVehicles() do
-		table.insert(vehicles, vehicle)
-	end
-
-	return vehicles
-end
-
-GetVehiclesInArea = function(coords, maxDistance) return EnumerateEntitiesWithinDistance(GetVehicles(), false, coords, maxDistance) end
-IsSpawnPointClear = function(coords, maxDistance) return #GetVehiclesInArea(coords, maxDistance) == 0 end
-
------------------------------------------------------------------------------------------------------------------------------------------
--- debug
------------------------------------------------------------------------------------------------------------------------------------------
-function print_table(node)
-	if type(node) == "table" then
-		-- to make output beautiful
-		local function tab(amt)
-			local str = ""
-			for i=1,amt do
-				str = str .. "\t"
-			end
-			return str
-		end
-	
-		local cache, stack, output = {},{},{}
-		local depth = 1
-		local output_str = "{\n"
-	
-		while true do
-			local size = 0
-			for k,v in pairs(node) do
-				size = size + 1
-			end
-	
-			local cur_index = 1
-			for k,v in pairs(node) do
-				if (cache[node] == nil) or (cur_index >= cache[node]) then
-				
-					if (string.find(output_str,"}",output_str:len())) then
-						output_str = output_str .. ",\n"
-					elseif not (string.find(output_str,"\n",output_str:len())) then
-						output_str = output_str .. "\n"
-					end
-	
-					-- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
-					table.insert(output,output_str)
-					output_str = ""
-				
-					local key
-					if (type(k) == "number" or type(k) == "boolean") then
-						key = "["..tostring(k).."]"
-					else
-						key = "['"..tostring(k).."']"
-					end
-	
-					if (type(v) == "number" or type(v) == "boolean") then
-						output_str = output_str .. tab(depth) .. key .. " = "..tostring(v)
-					elseif (type(v) == "table") then
-						output_str = output_str .. tab(depth) .. key .. " = {\n"
-						table.insert(stack,node)
-						table.insert(stack,v)
-						cache[node] = cur_index+1
-						break
-					else
-						output_str = output_str .. tab(depth) .. key .. " = '"..tostring(v).."'"
-					end
-	
-					if (cur_index == size) then
-						output_str = output_str .. "\n" .. tab(depth-1) .. "}"
-					else
-						output_str = output_str .. ","
-					end
-				else
-					-- close the table
-					if (cur_index == size) then
-						output_str = output_str .. "\n" .. tab(depth-1) .. "}"
-					end
-				end
-	
-				cur_index = cur_index + 1
-			end
-	
-			if (#stack > 0) then
-				node = stack[#stack]
-				stack[#stack] = nil
-				depth = cache[node] == nil and depth + 1 or depth - 1
-			else
-				break
-			end
-		end
-	
-		-- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
-		table.insert(output,output_str)
-		output_str = table.concat(output)
-	
-		print(output_str)
-	else
-		print(node)
-	end
-end
+end)
