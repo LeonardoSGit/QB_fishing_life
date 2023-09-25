@@ -28,6 +28,14 @@ body {
 	grid-template-columns: 80px 1200px;
 }
 
+.main-stock {
+	width: 1280px;
+	height: 726px;
+	border-radius: 0px 20px 20px 0px;
+	display: grid;
+	grid-template-columns: 80px 1200px;
+}
+
 .card-centering {
     min-height: 120px;
     display: flex;
@@ -361,6 +369,21 @@ body {
 .deliveries-page .view-location-container > a:hover {
 	cursor: pointer;
 	text-decoration: none;
+}
+
+/*==========================*/
+/*======= DELIVERIES =======*/
+/*==========================*/
+
+.dives-page {
+	height: 1px;
+	background-color: rgba(0,0,0,.1);
+}
+
+.dives-page .card-body {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
 }
 
 /*==========================*/

@@ -1,5 +1,12 @@
 Config = {}
 
+Config.lang = "en"								-- Set the file language [en]
+
+Config.format = {
+	['currency'] = 'USD',						-- This is the currency format, so that your currency symbol appears correctly [Examples: BRL, USD] (https://taxsummaries.pwc.com/glossary/currency-codes)
+	['location'] = 'en-US'						-- This is the location of your country, to format the decimal places according to your standard [Examples: pt-BR, en-US] (http://www.lingoes.net/en/translator/langcode.htm)
+}
+
 Config.account = {								-- Account configs
 	['fisher'] = 'bank',						-- Change here the account that should be used with fisher expenses
 }
@@ -93,6 +100,42 @@ Config.available_contracts = {
 	}
 }
 
+
+Config.available_dives = {
+	['definitions'] = {
+		['time_to_new_dives'] = 2, 							-- Time (in mins) to generate new contracts to the contracts page
+		['max_dives'] = 6,								-- Max available contracts
+	},
+	['dives'] = {										-- Contracts that will be generated
+		{
+			['name'] = 'Caca ao tesouro',								-- Contract name
+			['description'] = 'xxxxxx',	-- Contract description
+			['image'] = 'images/deliveries/delivery.jpg',	-- Suggested size 666x375
+			['reward'] = {									-- Rewards the player will receive when finishing this contract
+				['money_min'] = 1000,						-- Money min amount
+				['money_max'] = 2000						-- Money max amount
+			},
+			[ 'location' ] = {867.34, -884.69, 25.77},
+			[ 'height' ] = 100,
+			[ 'width' ] = 100,
+		},
+		{
+			['name'] = 'Arca do tesouro',
+			['description'] = 'Some quick example text to build on the card title and make up the bulk.',
+			['image'] = 'images/deliveries/delivery.jpg',
+			['reward'] = {									-- The rewards can be items too, just set the item and the amount
+				['item'] = 'beer',
+				['display_name'] = 'Beer',
+				['amount'] = 5
+			},
+			[ 'location' ] = {867.34, -884.69, 25.77},
+			[ 'height' ] = 100,
+			[ 'width' ] = 100,
+			
+		}
+	}
+}
+
 Config.vehicle_sell_price_multiplier = 0.7		-- Value you receive when selling the used item
 Config.available_items_store = {
 	['vehicle'] = {
@@ -103,7 +146,6 @@ Config.available_items_store = {
 			['image'] = 'images/vehicles/rubble.png',
 			['repair_price'] = 400,
 			['refuel_price'] = 10,
-			['level_required'] = 1
 		},
 	},
 	['boat'] = {
@@ -114,7 +156,6 @@ Config.available_items_store = {
 			['image'] = 'images/vehicles/rubble.png',
 			['repair_price'] = 400,
 			['refuel_price'] = 10,
-			['level_required'] = 1
 		},
 	},
 	['property'] = {
@@ -124,90 +165,124 @@ Config.available_items_store = {
 			['warehouse_capacity'] = 100,
 			['image'] = 'images/vehicles/rubble.png',
 			['location'] = {854.28, -898.53, 25.35},
-			['level_required'] = 1
+			['repair_price'] = 1.0,
 		},
 	}
 }
 
+Config.time_degradate_property = 1
+
 Config.upgrades = {
-    ['stock'] = {
-        { points_required = 1, level_reward = 100, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 200, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 300, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 400, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 600, icon = 'fuel.png' },
-    },
     ['boats'] = {
-        { points_required = 1, level_reward = 10, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 20, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 30, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 40, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 60, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 10, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 20, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 30, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 40, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 60, icon = 'images/fuel.png' },
     },
     ['vehicles'] = {
-        { points_required = 1, level_reward = 2, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 4, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 6, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 8, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 12, icon = 'fuel.png' },
-    },
-    ['properties'] = {
-        { points_required = 1, level_reward = 2, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 4, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 6, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 8, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 12, icon = 'fuel.png' },
-    },
-    ['rods'] = {
-        { points_required = 1, level_reward = 2, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 4, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 6, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 8, icon = 'fuel.png' },
-        { points_required = 1, level_reward = 12, icon = 'fuel.png' },
+        { points_required = 1, level_reward = 3, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 4, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 6, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 8, icon = 'images/fuel.png' },
+        { points_required = 1, level_reward = 12, icon = 'images/fuel.png' },
     },
     ['lake'] = {
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
     },
     ['sea'] = {
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
     },
     ['swan'] = {
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
-        { points_required = 1, icon = 'fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+        { points_required = 1, icon = 'images/fuel.png' },
+    },
+}
+
+Config.equipments_upgrades = {
+    ['windlass'] = { --pescar mais facil
+        { price = 1, level_reward = 1, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 3, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 4, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 6, icon = 'images/fuel.png' },
+    },
+    ['rod'] = { -- pegar mais peixes raros
+        { price = 1, level_reward = 3, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 4, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 6, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 8, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 12, icon = 'images/fuel.png' },
+    },
+    ['bait'] = { -- pescar mais rpaido
+        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 4, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 6, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 8, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 12, icon = 'images/fuel.png' },
+    },
+    ['gimp'] = { -- durabilidade
+        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
     },
 }
 
 
-Config.fishs = {
-	['tuna'] = {
+Config.fishs_available = {
+	['tuna_fish' ] = {
+		[ 'item' ] = 'tuna_fish',
+		[ 'img' ] = 'images/fuel.png',
+		[ 'name' ] = 'Tuna',
+		[ 'weight' ] = '1',
+		[ 'sale_value' ] = '1',
+		[ 'place' ] = 'swan',
+	},
+	['salmon_fish'] = {
+		[ 'item' ] = 'salmon_fish',
+		[ 'img' ] = 'images/fuel.png',
+		[ 'name' ] = 'Salmon',
+		[ 'weight' ] = '1',
+		[ 'sale_value' ] = '1',
+		[ 'place' ] = 'swan',
 	}
 }
 
-Config.rods = {
-	['1'] = { 'tuna' }
+Config.vehicles = {
+	[ 1 ] = { 'weevil' }
+}
+
+Config.boats = {
+	[ 1 ] = { 'weevil' }
+}
+
+Config.properties = {
+	[ 1 ] = { 'weevil' }
 }
 
 Config.swan = {
-	['1'] = { 'tuna' }
+	[ 1 ] = { 'tuna_fish' }
 }
 
 Config.sea = {
-	['1'] = { 'tuna' }
+	[ 1 ] = { 'salmon_fish' }
 }
 
 Config.lake = {
-	['1'] = { 'tuna' }
+	[ 1 ] = { 'tuna_fish' }
 }
 
 Config.vehicle_blips = {						-- Configure here the vehicle blips created in the script

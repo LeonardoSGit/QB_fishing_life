@@ -2,6 +2,7 @@ Utils = exports['lc_utils']:GetUtils()
 local cooldown = {}
 local is_open = {}
 local started = {}
+local startedDive = {}
 
 local vehicle_spawned = {}
 function sendInternalWebhookMessage(webhook,message)
@@ -21,7 +22,7 @@ local vrp_ready = true
 Citizen.CreateThread(function()
 	Wait(5000)
 	if Config.create_table then
-		MySQL_Sync_execute([[
+		Utils.Database.execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_available_contracts` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				`name` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
@@ -39,7 +40,7 @@ Citizen.CreateThread(function()
 			ENGINE=InnoDB
 			;
 		]])
-		MySQL_Sync_execute([[
+		Utils.Database.execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_life_loans` (
 				`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
@@ -54,17 +55,20 @@ Citizen.CreateThread(function()
 			ENGINE=InnoDB
 			;
 		]])
-		MySQL_Sync_execute([[
+		Utils.Database.execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_life_users` (
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 				`stock_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`boats_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`vehicles_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`properties_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
-				`rods_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`sea_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`lake_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`swan_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`windlass_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`rod_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`bait_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`gimp_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`money` INT(11) NOT NULL DEFAULT '0',
 				`exp` INT(11) NOT NULL DEFAULT '0',
 				`skill_points` INT(11) NOT NULL DEFAULT '0',
@@ -76,7 +80,7 @@ Citizen.CreateThread(function()
 			;
 		]])
 		
-		MySQL_Sync_execute([[
+		Utils.Database.execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_life_vehicles` (
 				`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
@@ -93,12 +97,14 @@ Citizen.CreateThread(function()
 			ENGINE=InnoDB
 			;
 		]])		
-		MySQL_Sync_execute([[
+		Utils.Database.execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_life_properties` (
 				`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 				`property` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 				`properties` LONGTEXT NOT NULL COLLATE 'utf8_general_ci',
+				`stock` LONGTEXT NOT NULL COLLATE 'utf8_general_ci',
+				`property_condition`  INT(11) UNSIGNED NOT NULL DEFAULT '100',
 				PRIMARY KEY (`id`) USING BTREE,
 				INDEX `fishing_life_vehicle` (`user_id`, `property`) USING BTREE
 			)
@@ -108,7 +114,9 @@ Citizen.CreateThread(function()
 		]])
 	end
 	local sql = "UPDATE `fishing_available_contracts` SET progress = NULL";
-	MySQL_Sync_execute(sql, {});
+	Utils.Database.execute(sql, {});
+	local sql = "UPDATE `fishing_available_dives` SET progress = NULL";
+	Utils.Database.execute(sql, {});
 	-- Wait(2000)
 	-- print("^2["..GetCurrentResourceName().."] "..dec("QXV0aGVudGljYXRlZCEgU3VwcG9ydCBkaXNjb3JkOiBodHRwczovL2Rpc2NvcmQuZ2cvVTVZRGdiaF43").." ^3[v"..version..subversion.."]^7")
 	-- while not connected do
@@ -138,6 +146,8 @@ AddEventHandler('playerDropped', function(reason)
 	if started[source] then
 		local sql = "UPDATE `fishing_available_contracts` SET progress = NULL WHERE id = @id;";
 		Utils.Database.execute(sql, {['@id'] = started[source].id});
+		local sql = "UPDATE `fishing_available_dives` SET progress = NULL WHERE id = @id;";
+		Utils.Database.execute(sql, {['@id'] = startedDive[source].id});
 		started[source] = nil
 	end
 	is_open[source] = nil
@@ -208,6 +218,64 @@ Citizen.CreateThread(function()
 	end
 end)
 
+Citizen.CreateThread(function()
+	Citizen.Wait(10000)
+	while vrp_ready == nil do Wait(100) end
+
+	while true do
+		local dive_id = math.random(1,#Config.available_dives['dives'])
+		local dive = Config.available_dives.dives[dive_id]
+
+		local money_reward = nil
+		local item_reward = nil
+		if dive.reward.money_min then
+			money_reward = math.random(dive.reward.money_min,dive.reward.money_max)
+		else
+			item_reward = json.encode(dive.reward)
+		end
+
+		local sql = "SELECT COUNT(id) as qtd FROM fishing_available_dives";
+		local count = Utils.Database.fetchAll(sql, {})[1].qtd;
+		
+		if tonumber(count) >= Config.available_dives.definitions.max_dives then
+			local sql = "SELECT MIN(id) as min FROM fishing_available_dives WHERE progress IS NULL";
+			local min = Utils.Database.fetchAll(sql, {})[1].min;
+			
+			local sql = "DELETE FROM `fishing_available_dives` WHERE id = @id;";
+			Utils.Database.execute(sql, {['@id'] = min});
+		end
+
+		local location = dive.location
+		local sql = "INSERT INTO `fishing_available_dives` (name, description, image, money_reward, item_reward, dive_location, timestamp) VALUE (@name, @description, @image, @money_reward, @item_reward, @dive_location, @timestamp)";
+		Utils.Database.execute(sql, {['@name'] = dive.name, ['@description'] = dive.description, ['@image'] = dive.image,  ['@money_reward'] = money_reward, ['@item_reward'] = item_reward, ['@dive_location'] = json.encode(location), ['@timestamp'] = os.time()});
+
+		Wait(1000*60*Config.available_dives.definitions.time_to_new_dives)
+	end
+end)
+
+Citizen.CreateThread(function()
+	Citizen.Wait(10000)
+	while vrp_ready == nil do Wait(100) end
+
+	while true do
+		local sql = "SELECT * FROM `fishing_life_properties`";
+		local query = Utils.Database.fetchAll(sql)
+		for k,v in pairs(query) do
+
+				local sql = " UPDATE `fishing_life_properties` SET property_condition = property_condition - 1 where user_id=@user_id and property = @property"
+				Utils.Database.execute(sql,{['@user_id'] = v.user_id, ['@property'] = v.property})
+				if v.property_condition < 1 then
+					local sql = "DELETE from `fishing_life_properties` where user_id=@user_id and property = @property "
+					Utils.Database.execute(sql, {['@user_id'] = v.user_id, ['@property'] = v.property});
+				elseif v.property_condition < 10 then
+					local source = Utils.Framework.getPlayerSource(v.user_id)
+					TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('will_lose_property'):format(v.property))
+				end
+		end
+		Wait(1000*60*Config.time_degradate_property)
+	end
+end)
+
 RegisterServerEvent("lc_fishing_life:getData")
 AddEventHandler("lc_fishing_life:getData",function(key)
 	if vrp_ready then
@@ -219,11 +287,9 @@ AddEventHandler("lc_fishing_life:getData",function(key)
 end)
 
 RegisterServerEvent("lc_fishing_life:getDataProperty")
-AddEventHandler("lc_fishing_life:getDataProperty",function(key)
+AddEventHandler("lc_fishing_life:getDataProperty",function(property)
 	if vrp_ready then
 		local source = source
-		local property = Config.available_items_store['property'][key]
-		property.property = key
 		Wrapper(source,function(user_id)
 			openPropertyUI(source,property,user_id)
 		end)
@@ -319,7 +385,130 @@ AddEventHandler("lc_fishing_life:cancelContract",function()
 		TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('contract_cancel'))
 		TriggerClientEvent("lc_fishing_life:cancelContract",source)
 		started[source] = nil
-		openUI(source,key,true) -- TODO: varivel key é undefined aqui
+		openUI(source,nil,true)
+	end)
+end)
+
+
+
+RegisterServerEvent("lc_fishing_life:startDive")
+AddEventHandler("lc_fishing_life:startDive",function(key,data)
+	local source = source
+	Wrapper(source,function(user_id)
+		local sql = "SELECT * FROM `fishing_available_dives` WHERE id = @id";
+		local query_dive = Utils.Database.fetchAll(sql,{['@id'] = data.dive_id})[1];
+		if not query_dive then
+			TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('dive_invalid'))
+			return
+		end
+
+		if query_dive.progress ~= nil then
+			TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('dive_someone_already_started'))
+			return
+		end
+
+		if startedDive[source] then
+			TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('dive_already_started'))
+			return
+		end
+
+		startedDive[source] = query_dive
+		local sql = "UPDATE `fishing_available_dives` SET progress = @user_id WHERE id = @id";
+		Utils.Database.execute(sql, {['@user_id'] = user_id, ['@id'] = startedDive[source].id});
+		TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('dive_started'))
+		TriggerClientEvent("lc_fishing_life:startDive",source,query_dive)
+	end)
+end)
+
+RegisterServerEvent("lc_fishing_life:finishDive")
+AddEventHandler("lc_fishing_life:finishDive",function()
+	local source = source
+	Wrapper(source,function(user_id)
+		if not startedDive[source] then
+			return
+		end
+		
+		if startedDive[source].money_reward then
+			giveFisherMoney(user_id,startedDive[source].money_reward)
+			TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('dive_received_money'):format(startedDive[source].money_reward))
+		else
+			local item_reward = json.decode(startedDive[source].item_reward)
+			if Utils.Framework.givePlayerItem(source,item_reward.item,item_reward.amount) then
+				TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('dive_received_item'):format(item_reward.amount,item_reward.display_name))
+			else
+				TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('dive_received_item_error'):format(item_reward.amount,item_reward.display_name))
+				return
+			end
+		end
+
+		local sql = "DELETE FROM `fishing_available_dives` WHERE id = @id";
+		Utils.Database.execute(sql, {['@id'] = startedDive[source].id});
+		TriggerClientEvent("lc_fishing_life:cancelDive",source)
+		started[source] = nil
+	end)
+end)
+
+RegisterServerEvent("lc_fishing_life:cancelDive")
+AddEventHandler("lc_fishing_life:cancelDive",function()
+	local source = source
+	Wrapper(source,function(user_id)
+		Utils.Debug.printTable(startedDive)
+		if not startedDive[source] then
+			return
+		end
+
+		local sql = "UPDATE `fishing_available_dives` SET progress = NULL WHERE id = @id";
+		Utils.Database.execute(sql, {['@id'] = startedDive[source].id});
+		TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('dive_cancel'))
+		TriggerClientEvent("lc_fishing_life:cancelDive",source)
+		started[source] = nil
+		openUI(source,nil,true)
+	end)
+end)
+
+RegisterServerEvent("lc_fishing_life:buyUpgrade")
+AddEventHandler("lc_fishing_life:buyUpgrade",function(key,data)
+	local source = source
+	Wrapper(source, function(user_id)
+		local level = tonumber(data.level) or 0
+		local upgrade = Config.upgrades[data.upgrade_type]
+		local sql = "SELECT * FROM `fishing_life_users` WHERE user_id = @user_id";
+		local query = Utils.Database.fetchAll(sql,{['@user_id'] = user_id});
+		if upgrade and level and level > 0 and query and query[1] and tonumber(query[1][data.upgrade_type..'_upgrade']) == (level - 1) then
+			if query[1].skill_points >= upgrade[level].points_required then
+				local sql = "UPDATE `fishing_life_users` SET " ..data.upgrade_type.. "_upgrade = @level , skill_points = skill_points - 1  WHERE user_id = @user_id";
+				Utils.Database.execute(sql, {['@user_id'] = user_id, ['@level'] = level});
+				TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('upgrade_purchased'))
+				openUI(source,key,true)
+			else
+				TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('insufficient_skill_points'))
+			end
+		else
+			TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('invalid_value'))
+		end
+	end)
+end)
+
+RegisterServerEvent("lc_fishing_life:buyEquipment")
+AddEventHandler("lc_fishing_life:buyEquipment",function(key,data)
+	local source = source
+	Wrapper(source, function(user_id)
+		local level = tonumber(data.level) or 0
+		local equipment = Config.equipments_upgrades[data.equipment_type]
+		local sql = "SELECT * FROM `fishing_life_users` WHERE user_id = @user_id";
+		local query = Utils.Database.fetchAll(sql,{['@user_id'] = user_id});
+		if equipment and level and level > 0 and query and query[1] and tonumber(query[1][data.equipment_type..'_upgrade']) == (level - 1) then
+			if tryGetFisherMoney(user_id,data.price) then
+				local sql = "UPDATE `fishing_life_users` SET " ..data.equipment_type.. "_upgrade = @level  WHERE user_id = @user_id";
+				Utils.Database.execute(sql, {['@user_id'] = user_id, ['@level'] = level});
+				TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('upgrade_purchased'))
+				openUI(source,key,true)
+			else
+				TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('insufficient_money'))
+			end
+		else
+			TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('invalid_value'))
+		end
 	end)
 end)
 
@@ -343,7 +532,7 @@ AddEventHandler("lc_fishing_life:viewPropertyLocation",function(key,data)
 	local source = source
 	Wrapper(source,function(user_id)
 		local property_location = Config.available_items_store.property[data.property_id].location
-		if query_contract then -- TODO: varivel query_contract é undefined aqui
+		if property_location then
 			TriggerClientEvent("lc_fishing_life:viewLocation",source,json.decode(json.decode(property_location)))
 			TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('contract_waypoint_set'))
 		else
@@ -358,16 +547,24 @@ AddEventHandler("lc_fishing_life:buyVehicle",function(key,data)
 	local source = source
 	Wrapper(source, function(user_id)
 		local price = Config.available_items_store[data.type][data.vehicle_id].price
-		if beforeBuyVehicle(source,data.vehicle_id,price,user_id) then
-			if tryGetFisherMoney(user_id,price) then
-				local sql = "INSERT INTO `fishing_life_vehicles` (user_id, vehicle, properties, type) VALUES (@user_id, @vehicle, @properties, @type);";
-				Utils.Database.execute(sql, {['@user_id'] = user_id, ['@vehicle'] = data.vehicle_id, ['@properties'] = json.encode({}),['@type'] = data.type});
-				TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('item_purchased'):format(data.type))
-				Utils.Webhook.sendWebhookMessage(WebhookURL,Utils.translate('logs_buy_vehicle'):format(user_id,data.vehicle_id,price,Utils.Framework.getPlayerIdLog(source)..os.date("\n["..Utils.translate('logs_date').."]: %d/%m/%Y ["..Utils.translate('logs_hour').."]: %H:%M:%S")))
-				openUI(source,key,true)
-			else
-				TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('insufficient_money'))
+		local sql = "SELECT * FROM `fishing_life_vehicles` WHERE user_id = @user_id and type = @type";		
+		local owned_vehicles = Utils.Database.fetchAll(sql,{['@user_id'] = user_id, ['@type'] = data.type});
+		local sql = "SELECT " ..data.type.. "s_upgrade FROM `fishing_life_users` WHERE user_id = @user_id";		
+		local level = Utils.Database.fetchAll(sql,{['@user_id'] = user_id})[1];
+		if Config.upgrades[data.type .. 's'][level[data.type.. "s_upgrade"]].level_reward > Utils.Table.tableLength(owned_vehicles) then
+			if beforeBuyVehicle(source,data.vehicle_id,price,user_id) then
+				if tryGetFisherMoney(user_id,price) then
+					local sql = "INSERT INTO `fishing_life_vehicles` (user_id, vehicle, properties, type) VALUES (@user_id, @vehicle, @properties, @type);";
+					Utils.Database.execute(sql, {['@user_id'] = user_id, ['@vehicle'] = data.vehicle_id, ['@properties'] = json.encode({}),['@type'] = data.type});
+					TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('item_purchased'):format(data.type))
+					Utils.Webhook.sendWebhookMessage(WebhookURL,Utils.translate('logs_buy_vehicle'):format(user_id,data.vehicle_id,price,Utils.Framework.getPlayerIdLog(source)..os.date("\n["..Utils.translate('logs_date').."]: %d/%m/%Y ["..Utils.translate('logs_hour').."]: %H:%M:%S")))
+					openUI(source,key,true)
+				else
+					TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('insufficient_money'))
+				end
 			end
+		else
+			TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('garage_full'))
 		end
 	end)
 end)
@@ -526,6 +723,7 @@ AddEventHandler("lc_fishing_life:buyProperty",function(key,data)
 	local source = source
 	Wrapper(source, function(user_id)
 		local price = Config.available_items_store[data.type][data.property_id].price
+		local sql = "SELECT * FROM `fishing_life_properties` WHERE user_id = @user_id";
 		if beforeBuyVehicle(source,data.vehicle_id,price,user_id) then
 			if tryGetFisherMoney(user_id,price) then
 				local sql = "INSERT INTO `fishing_life_properties` (user_id, property, properties) VALUES (@user_id, @property, @properties);";
@@ -540,19 +738,6 @@ AddEventHandler("lc_fishing_life:buyProperty",function(key,data)
 	end)
 end)
 
-
-RegisterServerEvent("lc_fishing_life:getProperties")
-AddEventHandler("lc_fishing_life:getProperties",function()
-	local source = source
-	Wrapper(source, function(user_id)
-		local sql = "SELECT * FROM `fishing_life_properties`";
-		local query = Utils.Database.fetchAll(sql, {});
-		for k,v in pairs(query) do
-			v.original_user_id = user_id;
-		end
-		TriggerClientEvent("lc_fishing_life:setPropertiesBlips",source or -1,query)
-	end)
-end)
 
 RegisterServerEvent("lc_fishing_life:withdrawMoney")
 AddEventHandler("lc_fishing_life:withdrawMoney",function(key, data)
@@ -635,9 +820,93 @@ AddEventHandler("lc_fishing_life:payLoan",function(key, data)
 			local sql = "DELETE FROM `fishing_life_loans` WHERE id = @id;";
 			Utils.Database.execute(sql, {['@id'] = data.loan_id});
 			TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('loan_paid'))
-			openUI(source,key,true)
+			openUI(source,key,data)
 		else
 			TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('insufficiente_funds'))
+		end
+	end)
+end)
+
+RegisterServerEvent("lc_fishing_life:withdrawItem")
+AddEventHandler("lc_fishing_life:withdrawItem",function(key,data)
+	local source = source
+	Wrapper(source, function(user_id)
+		local sql = "SELECT stock FROM `fishing_life_properties` WHERE property = @property and user_id = @user_id";
+		local query =  Utils.Database.fetchAll(sql,{['@property'] = data.property, ['@user_id'] = user_id});
+		if query and query[1] then
+			local config_item = nil
+			if  string.find(data.item,'fish') then
+				config_item = Config.fishs_available[data.item]
+			end
+			if config_item then
+				data.amount = math.floor(tonumber(data.amount) or 0)
+				local arr_stock = json.decode(query[1].stock)
+				if data.amount > 0 and arr_stock[data.item] and (arr_stock[data.item] - data.amount) >= 0 then
+					local success = false
+					success = Utils.Framework.givePlayerItem(source,data.item,data.amount)
+					if success then
+						TriggerClientEvent("lc_fishing_life:Notify",source,"success",Lang[Config.lang]['stock_item_withdrawn'])
+					end
+					if success then
+						arr_stock[data.item] = arr_stock[data.item] - data.amount
+						if arr_stock[data.item] == 0 then arr_stock[data.item] = nil end
+						local sql = "UPDATE `fishing_life_properties` SET stock = @stock WHERE property = @property and user_id = @user_id";
+						Utils.Database.execute(sql, {['@stock'] = json.encode(arr_stock), ['@property'] = data.property, ['@user_id'] = user_id});
+						openPropertyUI(source,data.property,user_id)
+					else
+						TriggerClientEvent("lc_fishing_life:Notify",source,"error",Lang[Config.lang]['cant_carry_item'])
+					end
+				else
+					TriggerClientEvent("lc_fishing_life:Notify",source,"error",Lang[Config.lang]['invalid_value'])
+				end
+			else
+				TriggerClientEvent("lc_fishing_life:Notify",source,"error",Lang[Config.lang]['stock_cannot_withdraw'])
+			end
+		end
+	end)
+end)
+
+RegisterServerEvent("lc_fishing_life:depositItem")
+AddEventHandler("lc_fishing_life:depositItem",function(key,data)
+	local source = source
+	Utils.Debug.printTable(data)
+	Wrapper(source, function(user_id)
+		local sql = "SELECT stock FROM `fishing_life_properties` WHERE property = @property and user_id = @user_id";
+		local query =  Utils.Database.fetchAll(sql,{['@property'] = data.property, ['@user_id'] = user_id});
+		if query and query[1] then
+			data.amount = math.floor(tonumber(data.amount) or 0)
+			local arr_stock = json.decode(query[1].stock)
+			if data.amount > 0 then
+				local stock_amount = getStockWeight(arr_stock)
+				local max_stock = getMaxStock(data.property)
+				local config_item = nil
+				if  string.find(data.item,'fish') then
+					config_item = Config.fishs_available[data.item]
+				end
+				if config_item then
+					if stock_amount + (data.amount * config_item.weight) <= max_stock then
+						Utils.Debug.printTable(data.item)
+						Utils.Debug.printTable(data.amount)
+						success = Utils.Framework.getPlayerItem(source,data.item,data.amount)
+						if success then
+							TriggerClientEvent("lc_fishing_life:Notify",source,"success",Lang[Config.lang]['stock_item_deposited'])
+						end
+						if success then
+							if not arr_stock[data.item] then arr_stock[data.item] = 0 end
+							arr_stock[data.item] = arr_stock[data.item] + data.amount
+							local sql = "UPDATE `fishing_life_properties` SET stock = @stock , property = @property , user_id = @user_id";
+							Utils.Database.execute(sql, {['@property'] = data.property, ['@user_id'] = user_id,  ['@stock'] = json.encode(arr_stock)});
+							openPropertyUI(source,data.property,user_id)
+						else
+							TriggerClientEvent("lc_fishing_life:Notify",source,"error",Lang[Config.lang]['dont_have_item']:format(data.amount,config_item.name))
+						end
+					else
+						TriggerClientEvent("lc_fishing_life:Notify",source,"error",Lang[Config.lang]['stock_property_full'])
+					end
+				end
+			else
+				TriggerClientEvent("lc_fishing_life:Notify",source,"error",Lang[Config.lang]['invalid_value'])
+			end
 		end
 	end)
 end)
@@ -686,6 +955,27 @@ function getAccount()
 	end
 end
 
+
+function getStockWeight(arr_stock)
+	local weight = 0
+	for k,v in pairs(arr_stock) do
+		local item = nil
+		if string.find(k,'fish') then
+			item = Config.fishs_available[k]
+		end
+		if item then
+			weight = weight + item.weight * v
+		else
+			print("^8["..GetCurrentResourceName().."]^3 item ^1"..k.."^3 is in a property stock but it is not configured in config, please add it in the config.^7")
+		end
+	end
+	return weight
+end
+
+function getMaxStock(property)
+	return Config.available_items_store.property[property].warehouse_capacity
+end
+
 function getMaxLoan(user_id)
 	local max_loan = 0;
 	local level = getPlayerLevel(user_id)
@@ -732,9 +1022,18 @@ function openUI(source,key,isUpdate)
 			end
 		end
 
+		--Busca todos os items disponiveis para compra de acordo com o level do usuario
+		query.available_vehicles = Utils.Table.deepCopy(Config.vehicles[query.fishing_life_users.vehicles_upgrade])
+		query.available_boats = Utils.Table.deepCopy(Config.vehicles[query.fishing_life_users.boats_upgrade])
+		query.available_properties = Utils.Table.deepCopy(Config.vehicles[query.fishing_life_users.properties_upgrade])
+
 		-- Busca os contratos ativos
 		local sql = "SELECT * FROM `fishing_available_contracts` WHERE progress IS NULL OR progress = @user_id";
 		query.fishing_available_contracts = Utils.Database.fetchAll(sql,{['@user_id'] = user_id});
+
+		-- Busca os dives ativos
+		local sql = "SELECT * FROM `fishing_available_dives` WHERE progress IS NULL OR progress = @user_id";
+		query.fishing_available_dives = Utils.Database.fetchAll(sql,{['@user_id'] = user_id});
 
 		-- Busca os emprestimos
 		local sql = "SELECT * FROM `fishing_life_loans` WHERE user_id = @user_id";
@@ -765,14 +1064,20 @@ function openUI(source,key,isUpdate)
 
 		-- Busca as configs necessárias
 		query.config = {}
-		query.config.lang =  Utils.Table.deepcopy(Config.lang)
-		query.config.format =  Utils.Table.deepcopy(Config.format)
-		query.config.required_xp_to_levelup =  Utils.Table.deepcopy(Config.required_xp_to_levelup)
-		query.config.max_loan_per_level =  Utils.Table.deepcopy(Config.max_loan_per_level)
-		query.config.loans =  Utils.Table.deepcopy(Config.loans.amount)
-		query.config.contracts =  Utils.Table.deepcopy(Config.available_contracts.definitions)
-		query.config.available_items_store =  Utils.Table.deepcopy(Config.available_items_store)
-		query.config.upgrades =  Utils.Table.deepcopy(Config.upgrades)
+		query.config.lang =  Utils.Table.deepCopy(Config.lang)
+		query.config.format =  Utils.Table.deepCopy(Config.format)
+		query.config.required_xp_to_levelup =  Utils.Table.deepCopy(Config.required_xp_to_levelup)
+		query.config.max_loan_per_level =  Utils.Table.deepCopy(Config.max_loan_per_level)
+		query.config.loans =  Utils.Table.deepCopy(Config.loans.amount)
+		query.config.contracts =  Utils.Table.deepCopy(Config.available_contracts.definitions)
+		query.config.dives =  Utils.Table.deepCopy(Config.available_dives.definitions)
+		query.config.available_items_store =  Utils.Table.deepCopy(Config.available_items_store)
+		query.config.upgrades =  Utils.Table.deepCopy(Config.upgrades)
+		query.config.equipments_upgrades =  Utils.Table.deepCopy(Config.equipments_upgrades)
+		query.config.fishs_available =  Utils.Table.deepCopy(Config.fishs_available)
+		query.config.lake = Utils.Table.deepCopy(Config.lake)
+		query.config.sea = Utils.Table.deepCopy(Config.sea)
+		query.config.swan = Utils.Table.deepCopy(Config.swan)
 		-- query.config.dealership = Utils.Table.deepCopy(Config.dealership)
 
 		-- Busca outras variaveis
@@ -784,19 +1089,47 @@ function openUI(source,key,isUpdate)
 	end
 end
 
-function openPropertyUI(source,property,user_id)
-
+function openPropertyUI(source,property_id,user_id)
 	-- Busca o stock
 	local data = {}
-	local sql = "SELECT stock FROM `fishing_life_properties` WHERE property = @property and user_id = @user_id";		
-	local query = Utils.Database.MySQL_Sync_fetchAll(sql,{['@property'] = property.property ,['@user_id'] = user_id})[1];
-	data.config = {}
-	data.config.lang = deepcopy(Config.lang)
-	data.config.format = deepcopy(Config.format)
-	property.stock =  json.decode(query.stock)
-	property.stock_amount = getStockAmount(property.stock)
-	-- Envia pro front-end
-	TriggerClientEvent("qb_fishing_life:openProperty",source, data, property)
+	local sql = "SELECT * FROM `fishing_life_properties` WHERE property = @property and user_id = @user_id";		
+	local property = Utils.Database.fetchAll(sql,{['@property'] = property_id ,['@user_id'] = user_id})[1];
+	if property then
+		data.config = {}
+		data.config.lang = Utils.Table.deepCopy(Config.lang)
+		data.config.format = Utils.Table.deepCopy(Config.format)
+		data.config.player_level = getPlayerLevel(user_id)
+		data.config.available_items_store =  Utils.Table.deepCopy(Config.available_items_store)
+		data.config.fishs_available =  Utils.Table.deepCopy(Config.fishs_available)
+
+		-- Busca os dados do usuário
+		local sql = "SELECT * FROM `fishing_life_users` WHERE user_id = @user_id";
+		data.fishing_life_users = Utils.Database.fetchAll(sql,{['@user_id'] = user_id})[1];
+		if data.fishing_life_users == nil then
+			if beforeBuyLocation(source,user_id) then
+				local sql = "INSERT INTO `fishing_life_users` (user_id) VALUES (@user_id);";
+				Utils.Database.execute(sql, {['@user_id'] = user_id});
+				local sql = "SELECT * FROM `fishing_life_users` WHERE user_id = @user_id";
+				data.fishing_life_users = Utils.Database.fetchAll(sql,{['@user_id'] = user_id})[1];
+			else
+				return
+			end
+		end
+		local player_items = Utils.Framework.getPlayerInventory(source)
+		data.players_items_fishing = {}
+		for k,v in pairs(player_items) do
+			if string.find(v.name, "fish")	 then
+				table.insert(data.players_items_fishing,v)
+			end
+		end
+		property.stock =  json.decode(property.stock)
+		property.stock_amount = getStockAmount(property.stock)
+		property.name = Config.available_items_store.property[property.property].name
+		-- Envia pro front-end
+		TriggerClientEvent("lc_fishing_life:openProperty",source, data, property)
+	else
+		TriggerClientEvent("lc_fishing_life:Notify",source,"error",Lang[Config.lang]['you_dont_own_this_property'])
+	end
 end
 
 function getStockAmount(arr_stock)
@@ -924,6 +1257,23 @@ function runCreateTableQueries()
 			;
 		]])
 		Utils.Database.execute([[
+			CREATE TABLE IF NOT EXISTS `fishing_available_dives` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`name` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
+				`description` VARCHAR(255) NOT NULL COLLATE 'utf8_general_ci',
+				`image` VARCHAR(255) NOT NULL COLLATE 'utf8_general_ci',
+				`money_reward` INT(11) NULL DEFAULT NULL,
+				`item_reward` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
+				`dive_location` VARCHAR(255) NOT NULL DEFAULT '' COLLATE 'utf8_general_ci',
+				`progress` VARCHAR(50) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
+				`timestamp` INT(11) NOT NULL,
+				PRIMARY KEY (`id`) USING BTREE
+			)
+			COLLATE='utf8_general_ci'
+			ENGINE=InnoDB
+			;
+		]])
+		Utils.Database.execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_life_loans` (
 				`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
@@ -941,6 +1291,16 @@ function runCreateTableQueries()
 		Utils.Database.execute([[
 			CREATE TABLE IF NOT EXISTS `fishing_life_users` (
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
+				`boats_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`vehicles_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`properties_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`sea_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`lake_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`swan_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`windlass_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`rod_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`bait_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`gimp_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`money` INT(11) NOT NULL DEFAULT '0',
 				`exp` INT(11) NOT NULL DEFAULT '0',
 				`skill_points` INT(11) NOT NULL DEFAULT '0',
@@ -975,6 +1335,8 @@ function runCreateTableQueries()
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 				`property` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 				`properties` LONGTEXT NOT NULL COLLATE 'utf8_general_ci',
+				`stock` LONGTEXT NOT NULL COLLATE 'utf8_general_ci',
+				`property_condition`  INT(11) UNSIGNED NOT NULL DEFAULT '100',
 				PRIMARY KEY (`id`) USING BTREE,
 				INDEX `fishing_life_vehicle` (`user_id`, `property`) USING BTREE
 			)

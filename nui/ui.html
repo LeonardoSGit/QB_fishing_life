@@ -208,23 +208,28 @@
 				</div>
 
 				
-				<div class="pages upgrades-page" style="display: none;">
+				<div class="pages dives-page" style="height: 100%;">
+					<div id="dives-title-div" class="col-12 mt-3 mb-3">
+
+					</div>
+					<div id="list-available-dives" class="row" style="max-height: calc(100% - var(--dives-title-height)); overflow: auto;">
+						
+					</div>
+					<div id="dives-footer-div" class="m-1">
+						<i class="fa-solid fa-clock" style="font-size: 15px;"></i><span id="new-dives-text" class="ml-2"></span>
+					</div>
+				</div>
+
+				<div class="pages upgrades-page" style="display: none; height: 100%;">
 					<div id="upgrades-title-div" class="col-12 mt-3 mb-2">
 						<h4 id="upgrades-page-title" class="text-uppercase"></h4>
 						<p id="upgrades-page-desc"></p>
-
+					</div>
+					<div style = "max-height: calc(98% - var(--upgrades-title-height)); overflow: auto;">						
 						<div id="navigation-tab-upgrades" class="col-12 navigation-tabs-container mb-2">
 							
 						</div>
-					</div>
-					<div style="height: calc(100% - var(--upgrades-title-height)); overflow: auto;">
-						<div class="tabs stock-upgrades-tab">
-							<h6 id="stock-upgrade-desc" class="col-12 my-4"></h6>
-							<ul id="stock-upgrades-list" class="upgrade-list list list-inline">
-
-							</ul>
-						</div>
-						<div class="tabs vehicles-upgrades-tab" style="display: none;">
+						<div class="tabs vehicles-upgrades-tab">
 							<h6 id="vehicles-upgrade-desc" class="col-12 my-4"></h6>
 							<ul id="vehicles-upgrades-list" class="upgrade-list list list-inline">
 								
@@ -235,18 +240,6 @@
 							<div id="boats-upgrades-list" class="upgrade-list list list-inline">
 								
 							</div>
-						</div>
-						<div class="tabs properties-upgrades-tab" style="display: none;">
-							<h6 id="properties-upgrade-desc" class="col-12 my-4"></h6>
-							<ul id="properties-upgrades-list" class="upgrade-list list list-inline">
-								
-							</ul>
-						</div>
-						<div class="tabs rods-upgrades-tab" style="display: none;">
-							<h6 id="rods-upgrade-desc" class="col-12 my-4"></h6>
-							<ul id="rods-upgrades-list" class="upgrade-list list list-inline">
-								
-							</ul>
 						</div>
 						<div class="tabs lake-upgrades-tab" style="display: none;">
 							<h6 id="lake-upgrade-desc" class="col-12 my-4"></h6>
@@ -263,6 +256,44 @@
 						<div class="tabs sea-upgrades-tab" style="display: none;">
 							<h6 id="sea-upgrade-desc" class="col-12 my-4"></h6>
 							<ul id="sea-upgrades-list" class="upgrade-list list list-inline">
+								
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				
+				
+				<div class="pages equipments-page" style="display: none; height: 100%;">
+					<div id="equipments-title-div" class="col-12 mt-3 mb-2">
+						<h4 id="equipments-page-title" class="text-uppercase"></h4>
+						<p id="equipments-page-desc"></p>
+					</div>
+					<div style = "max-height: calc(98% - var(--equipments-title-height)); overflow: auto;">						
+						<div id="navigation-tab-equipments" class="col-12 navigation-tabs-container mb-2">
+							
+						</div>
+						<div class="tabs windlass-equipments-tab">
+							<h6 id="windlass-equipments-desc" class="col-12 my-4"></h6>
+							<ul id="windlass-equipments-list" class="equipment-list list list-inline">
+								
+							</ul>
+						</div>
+						<div class="tabs rod-equipments-tab" style="display: none;">
+							<h6 id="rod-equipments-desc" class="col-12 my-4"></h6>
+							<div id="rod-equipments-list" class="equipment-list list list-inline">
+								
+							</div>
+						</div>
+						<div class="tabs bait-equipments-tab" style="display: none;">
+							<h6 id="bait-equipments-desc" class="col-12 my-4"></h6>
+							<ul id="bait-equipments-list" class="equipment-list list list-inline">
+								
+							</ul>
+						</div>
+						<div class="tabs gimp-equipments-tab" style="display: none;">
+							<h6 id="gimp-equipments-desc" class="col-12 my-4"></h6>
+							<ul id="gimp-equipments-list" class="equipment-list list list-inline">
 								
 							</ul>
 						</div>
@@ -321,6 +352,37 @@
 					<div>
 						<div id="owned-property-page-list" class="list list-inline"  style="height: calc(100% - var(--owned-property-title-height)); overflow: auto;">
 							
+						</div>
+					</div>
+				</div>	
+
+				<div class="pages guide-page" style="display: none; height: 100%;">
+					<div id="guide-title-div" class="col-12 mt-3 mb-3">
+
+					</div>
+					<div>
+						<div id="guide-navigation-tab" class="col-12 navigation-tabs-container mb-2">
+							
+						</div>
+						<div class="tabs guide-all-tab">
+							<div id="guide-all-page-list" class="row"  style="max-height: calc(100% - var(--guide-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+						<div class="tabs guide-sea-tab">
+							<div id="guide-sea-page-list" class="row"  style="max-height: calc(100% - var(--guide-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+						<div class="tabs guide-lake-tab">
+							<div id="guide-lake-page-list" class="row"  style="max-height: calc(100% - var(--guide-title-height)); overflow: auto;">
+								
+							</div>
+						</div>
+						<div class="tabs guide-swan-tab">
+							<div id="guide-swan-page-list" class="row"  style="max-height: calc(100% - var(--guide-title-height)); overflow: auto;">
+								
+							</div>
 						</div>
 					</div>
 				</div>	
@@ -464,67 +526,180 @@
 					</div>
 				</div>
 
-				
 				<div class="modal fade" id="stock-modal" aria-hidden="true">
 					<div class="modal-dialog modal-dialog-centered">
 						<div class="modal-content">
 							<div class="modal-header">
-								<h5 class="modal-title" id="inventory-modal-title"></h5>
+								<h5 class="modal-title" id="stock-modal-title"></h5>
 								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 									<span aria-hidden="true">&times;</span>
 								</button>
-							</div>
-							<div class="pages stock-page" style="display: none; height: 100%;">
-								<div id="stock-title-div" class="col-12 mt-3 mb-1">
-
-								</div>
-								<div style="height: calc(100% - var(--stock-title-height)); overflow: auto;">
-									<div class="d-flex justify-content-between col-12 mt-4">
-										<div id="stock-table-container" style="width: 50%;">
-											<h6 id="stock-table-property-title" class="font-weight-semi-bold"></h6>
-											<div class="card p-4">
-												<table class="table m-0 text-center">
-													<thead>
-														<tr>
-															<th id="stock-page-th-name" class="border-top-0 pt-0 text-left text-nowrap"></th>
-															<th id="stock-page-th-weight" class="border-top-0 pt-0 text-nowrap"></th>
-															<th id="stock-page-th-value" class="border-top-0 pt-0 text-nowrap"></th>
-															<th id="stock-page-th-amount" class="border-top-0 pt-0 text-nowrap"></th>
-														</tr>
-													</thead>
-													<tbody id="stock-table-body">
-														
-													</tbody>
-												</table>
-											</div>
-										</div>
-										<div id="stock-player-table-container" style="width: 48%;">
-											<h6 id="stock-table-player-title" class="font-weight-semi-bold"></h6>
-											<div class="card p-4">
-												<table class="table m-0 text-center">
-													<thead>
-														<tr>
-															<th id="stock-player-page-th-name" class="border-top-0 pt-0 text-left text-nowrap"></th>
-															<th id="stock-player-page-th-weight" class="border-top-0 pt-0 text-nowrap"></th>
-															<th id="stock-player-page-th-amount" class="border-top-0 pt-0 text-nowrap"></th>
-														</tr>
-													</thead>
-													<tbody id="stock-player-table-body">
-														
-													</tbody>
-												</table>
-											</div>
-										</div>
-									</div>
+							</div>								
+							<div id="stock-table-container-modal" style="padding:15px">
+								<h6 id="stock-table-property-title-modal" class="font-weight-semi-bold"></h6>
+								<div class="card p-4">
+									<table class="table m-0 text-center">
+										<thead>
+											<tr>
+												<th id="stock-page-th-name-modal" class="border-top-0 pt-0 text-left text-nowrap"></th>
+												<th id="stock-page-th-weight-modal" class="border-top-0 pt-0 text-nowrap"></th>
+												<th id="stock-page-th-amount-modal" class="border-top-0 pt-0 text-nowrap"></th>
+											</tr>
+										</thead>
+										<tbody id="stock-table-body-modal">
+											
+										</tbody>
+									</table>
 								</div>
 							</div>
-
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		
+
+		<div class="main-stock backgound-theme" style="display: none;">
+			<nav class="sidebar-navigation">
+				<ul id="nav-bar-stock">
+				</ul>
+			</nav>
+			
+			<div class="container-pages">
+				<div class="d-flex player-info-container">
+					<div class="d-flex mr-4">
+						<h4 class="m-0 mr-1 text-primary player-info-item">LVL.</h4>
+						<h5 id="player-info-level-stock" class="m-0 player-info-item"></h5>
+					</div>
+					<div class="d-flex mr-4">
+						<i class="fas fa-star mr-1 text-primary player-info-item"></i>
+						<h4 id="player-info-skill-stock" class="m-0 player-info-item"></h4>
+					</div>
+					<div id="player-info-money-container" class="d-flex mr-4">
+						<i class="fas fa-coins mr-1 text-primary player-info-item"></i>
+						<h4 id="player-info-money-stock" class="m-0 player-info-item"></h4>
+					</div>
+					<div class="custom-control custom-switch">
+						<input type="checkbox" class="custom-control-input" id="css-toggle" checked="">
+						<label class="custom-control-label" for="css-toggle"></label>
+						<i id="dark-theme-icon" class="fas fa-moon mr-1 text-primary player-info-item" for="css-toggle" style="display: none;"></i>
+						<i id="light-theme-icon" class="fas fa-sun mr-1 text-primary player-info-item" for="css-toggle"></i>
+					</div>
+				</div>
+
+				<div class="pages stock-page" style="height: 100%;">		
+				<div id="stock-title-div" class="col-12 mt-3 mb-2">
+				</div>
+				<div style = "max-height: calc(98% - var(--stock-title-height)); overflow: auto;">	
+					<div class="pages stock-page" style="display: none; height: 100%;">
+							<div class="d-flex justify-content-between col-12 mt-4">
+								<div id="stock-table-container" style="width: 50%;">
+									<h6 id="stock-table-property-title" class="font-weight-semi-bold"></h6>
+									<div class="card p-4">
+										<table class="table m-0 text-center">
+											<thead>
+												<tr>
+													<th id="stock-page-th-name" class="border-top-0 pt-0 text-left text-nowrap"></th>
+													<th id="stock-page-th-weight" class="border-top-0 pt-0 text-nowrap"></th>
+													<th id="stock-page-th-amount" class="border-top-0 pt-0 text-nowrap"></th>
+												</tr>
+											</thead>
+											<tbody id="stock-table-body">
+												
+											</tbody>
+										</table>
+									</div>
+								</div>
+								<div id="stock-player-table-container" style="width: 48%;">
+									<h6 id="stock-table-player-title" class="font-weight-semi-bold"></h6>
+									<div class="card p-4">
+										<table class="table m-0 text-center">
+											<thead>
+												<tr>
+													<th id="stock-player-page-th-name" class="border-top-0 pt-0 text-left text-nowrap"></th>
+													<th id="stock-player-page-th-weight" class="border-top-0 pt-0 text-nowrap"></th>
+													<th id="stock-player-page-th-amount" class="border-top-0 pt-0 text-nowrap"></th>
+												</tr>
+											</thead>
+											<tbody id="stock-player-table-body">
+												
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>	
+				</div>
+			</div>
+			
+			<div id="withdraw-item-modal" class="modal fade">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="withdraw-item-modal-title"></h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<form id="form-withdraw-item" class="m-0">
+							<div class="modal-body">
+								<div class="d-flex align-items-center flex-column">
+									<img id="withdraw-item-modal-img" style="width: 80px;">
+									<h6 id="withdraw-item-modal-item-name"></h6>
+								</div>
+								<div id="form-withdraw-item-input-container" class="mt-4 form-group align-items-center flex-column">
+									<small id="withdraw-item-modal-amount" class="text-muted" style="font-size: 12px;"></small>
+									<div class="d-flex justify-content-center w-100">
+										<button class="modal-inventory-buttons-amount btn btn-primary px-4 font-weight-semi-bold" type="button" id="subtract-button-withdraw" style="border-radius: 0.25rem 0 0 0.25rem;" disabled>-</button>
+										<input type="number" id="withdraw-modal-item-amount" placeholder="" name="amount" required="" class="form-control w-25 rounded-0 text-center" min="1">
+										<button class="modal-inventory-buttons-amount btn btn-primary px-4 font-weight-semi-bold" type="button" id="add-button-withdraw" style="border-radius: 0 0.25rem 0.25rem 0;">+</button>
+									</div>
+									<small id="withdraw-item-modal-item-available" class="text-muted" style="font-size: 12px;"></small>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button id="withdraw-item-modal-cancel" type="button" class="btn btn-outline-primary" data-dismiss="modal"></button>
+								<button id="withdraw-item-modal-submit" type="submit" class="btn btn-primary"></button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div id="deposit-item-modal" class="modal fade">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="deposit-item-modal-title"></h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<form id="form-deposit-item" class="m-0">
+							<div class="modal-body">
+								<div class="d-flex align-items-center flex-column">
+									<img id="deposit-item-modal-img" style="width: 80px;">
+									<h6 id="deposit-item-modal-item-name"></h6>
+								</div>
+								<div id="form-deposit-item-input-container" class="mt-4 form-group align-items-center flex-column">
+									<small id="deposit-item-modal-amount" class="text-muted" style="font-size: 12px;"></small>
+									<div class="d-flex justify-content-center w-100">
+										<button class="modal-inventory-buttons-amount btn btn-primary px-4 font-weight-semi-bold" type="button" id="subtract-button-deposit" style="border-radius: 0.25rem 0 0 0.25rem;" disabled>-</button>
+										<input type="number" id="deposit-modal-item-amount" placeholder="" name="amount" required="" class="form-control w-25 rounded-0 text-center">
+										<button class="modal-inventory-buttons-amount btn btn-primary px-4 font-weight-semi-bold" type="button" id="add-button-deposit" style="border-radius: 0 0.25rem 0.25rem 0;">+</button>
+									</div>
+									<small id="deposit-item-modal-item-available" class="text-muted" style="font-size: 12px;"></small>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button id="deposit-item-modal-cancel" type="button" class="btn btn-outline-primary" data-dismiss="modal"></button>
+								<button id="deposit-item-modal-submit" type="submit" class="btn btn-primary"></button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
 		<script src="panel.js" type="text/javascript"></script>
 	</body>
 </html>

@@ -1,4 +1,5 @@
 let config = {};
+let lang = 'en';
 
 window.addEventListener('message', async function (event) {
 	var item = event.data;
@@ -15,10 +16,19 @@ window.addEventListener('message', async function (event) {
 		let fishing_life_users = item.data.fishing_life_users;
 		let fishing_life_loans = item.data.fishing_life_loans;
 		let fishing_available_contracts = item.data.fishing_available_contracts;
+		let fishing_available_dives = item.data.fishing_available_dives;
 		let owned_vehicles = item.data.owned_vehicles
 		let owned_properties = item.data.owned_properties
+		let available_vehicles = item.data.available_vehicles;
+		let available_boats = item.data.available_boats;
+		let available_properties = item.data.available_properties;
 		let available_items_store = config.available_items_store;
 		let upgrades = config.upgrades
+		let equipments_upgrades = config.equipments_upgrades
+		let fishs_available = config.fishs_available
+		let swan = config.swan
+		let lake = config.lake
+		let sea = config.sea
 
 		if (item.isUpdate != true) {
 			// Open on first time
@@ -37,24 +47,34 @@ window.addEventListener('message', async function (event) {
 
 		renderStatisticsPage();
 		renderDeliveriesPage(fishing_available_contracts, fishing_life_users);
-		renderStorePage(available_items_store);
+		renderDivesPage(fishing_available_dives, fishing_life_users);
+		renderStorePage(available_items_store,available_vehicles,available_boats,available_properties,owned_properties);
 		renderOwnedVehiclesPage(owned_vehicles,available_items_store);
-		renderOwnedPropertiesPage(owned_properties,available_items_store);
+		renderOwnedPropertiesPage(owned_properties,available_items_store, fishs_available);
 		renderBankPage(fishing_life_users, item, fishing_life_loans);
 		renderUpgradesPage(upgrades,fishing_life_users);
+		renderEquipmentsPage(equipments_upgrades,fishing_life_users);
+		renderGuidePage(fishs_available,sea,lake,swan);
 
 		createListeners();
 	} else if(item.openPropertyUI){
-
 		config = item.data.config;
-		//$(".main").css("display", "none");
-		renderStockPage(item.property)
-		$(document).ready(function(){
-			$("#stock-modal").modal({show: true});
-		});
+		renderStaticTextsProperty()
+		/*
+		* PLAYER INFO HEADER
+		*/
+		let available_items_store = config.available_items_store;
+		let fishing_life_users = item.data.fishing_life_users;
+		let players_items_fishing = item.data.players_items_fishing
+		let fishs_available = config.fishs_available
+		$("#player-info-level-stock").text(Utils.numberFormat(config.player_level,0))
+		$("#player-info-skill-stock").text(Utils.numberFormat(fishing_life_users.skill_points,0))
+		$("#player-info-money-stock").text(Utils.currencyFormat(fishing_life_users.money,0))
+		renderStockPage(item.property,available_items_store,players_items_fishing,fishs_available)
 	}
 	if (item.hidemenu){
 		$(".main").css("display", "none");
+		$(".main-stock").css("display", "none");
 	}
 });
 
@@ -68,6 +88,23 @@ function createListeners() {
 		$('.navigation-tab').removeClass('selected');
 		$(this).addClass('selected');
 	});
+}
+
+function renderStaticTextsProperty(){
+	$(".main-stock").css("display", "");
+	$(".stock-page").css("display", "block");
+	$('#nav-bar-stock').html(`
+		<li class="active">
+			<i class="fas fa-warehouse"></i>
+			<span class="tooltip">Propriedade</span>
+		</li>
+		<li onclick="closeUI()">
+			<i class="fas fa-times"></i>
+			<span class="tooltip">${Utils.translate('sidebar_close')}</span>
+		</li>
+	`);
+
+
 }
 
 function renderStaticTexts() {
@@ -88,6 +125,13 @@ function renderStaticTexts() {
 	`);
 	$('#new-contracts-text').text(Utils.translate('deliveries_contracts_time').format(config.contracts.time_to_new_contracts));
 
+	// Dives page
+	$('#dives-title-div').html(`
+		<h4 class="text-uppercase">${Utils.translate('dives_page_title')}</h4>
+		<p>${Utils.translate('dives_page_desc')}</p>
+	`);
+	$('#new-dives-text').text(Utils.translate('dives_time').format(config.dives.time_to_new_dives));
+
 	
 	// Upgrades page
 	$('#upgrades-page-title').text(Lang[lang]['upgrades_page_title']);
@@ -96,10 +140,17 @@ function renderStaticTexts() {
 	$('#vehicles-upgrade-desc').text(Lang[lang]['upgrade_page_vehicles_desc']);
 	$('#boats-upgrade-desc').text(Lang[lang]['upgrade_page_boats_desc']);
 	$('#properties-upgrade-desc').text(Lang[lang]['upgrade_page_properties_desc']);
-	$('#rods-upgrade-desc').text(Lang[lang]['upgrade_page_rods_desc']);
 	$('#lake-upgrade-desc').text(Lang[lang]['upgrade_page_lake_desc']);
 	$('#swan-upgrade-desc').text(Lang[lang]['upgrade_page_swan_desc']);
 	$('#sea-upgrade-desc').text(Lang[lang]['upgrade_page_sea_desc']);
+
+	// Equipments page
+	$('#equipments-page-title').text(Lang[lang]['equipments_page_title']);
+	$('#equipments-page-desc').text(Lang[lang]['equipments_page_desc']);
+	$('#windlass-equipments-desc').text(Lang[lang]['equipment_page_windlass_desc']);
+	$('#gimp-equipments-desc').text(Lang[lang]['equipment_page_gimp_desc']);
+	$('#rod-equipments-desc').text(Lang[lang]['equipment_page_rod_desc']);
+	$('#bait-equipments-desc').text(Lang[lang]['equipment_page_bait_desc']);
 
 
 	// Store page
@@ -119,6 +170,13 @@ function renderStaticTexts() {
 		<h4 class="text-uppercase">${Utils.translate('owned_property_page_title')}</h4>
 		<p>${Utils.translate('owned_property_page_desc')}</p>
 	`);
+	
+	// Guide page
+	$('#guide-title-div').html(`
+		<h4 class="text-uppercase">${Utils.translate('guide_page_title')}</h4>
+		<p>${Utils.translate('guide_page_desc')}</p>
+	`);	
+	
 
 	// Bank page
 	$('#bank-title-div').html(`
@@ -166,33 +224,33 @@ function renderStaticTexts() {
 			<i class="fas fa-fish"></i>
 			<span class="tooltip">${Utils.translate('sidebar_deliveries')}</span>
 		</li>
-		<li onclick="openPage('dive')">
+		<li onclick="openPage('dives')">
 			<i class="fas fa-swimmer"></i>
 			<span class="tooltip">${Utils.translate('sidebar_dives')}</span>
 		</li>
-		<li onclick="openPage('upgrades','stock-upgrades')">
+		<li onclick="openPage('upgrades','vehicles-upgrades')">
 			<i class="fas fa-trophy"></i>
-			<span class="tooltip">Habilidades</span>
+			<span class="tooltip">${Utils.translate('sidebar_upgrades')}</span>
 		</li>
-		<li onclick="openPage(4)">
+		<li onclick="openPage('equipments','windlass-equipments')">
 			<i class="fas fa-cog"></i>
-			<span class="tooltip">Equipamentos</span>
+			<span class="tooltip">${Utils.translate('sidebar_equipments')}</span>
 		</li>
 		<li onclick="openPage('store','store-vehicle')">
 			<i class="fas fa-shopping-cart"></i>
-			<span class="tooltip">Lojas</span>
+			<span class="tooltip">${Utils.translate('sidebar_store')}</span>
 		</li>
 		<li onclick="openPage('owned-vehicle','owned-vehicle')">
 			<i class="fas fa-ship"></i>
-			<span class="tooltip">Veiculos</span>
+			<span class="tooltip">${Utils.translate('sidebar_owned_vehicles')}</span>
 		</li>
 		<li onclick="openPage('owned-property')">
 			<i class="fas fa-warehouse"></i>
-			<span class="tooltip">Propriedade</span>
+			<span class="tooltip">${Utils.translate('sidebar_owned_property')}</span>
 		</li>
-		<li onclick="openPage(8)">
+		<li onclick="openPage('guide','guide-all')">
 			<i class="far fa-map"></i>
-			<span class="tooltip">Guia</span>
+			<span class="tooltip">${Utils.translate('sidebar_guide')}</span>
 		</li>
 		<li onclick="openPage('bank')">
 			<i class="fas fa-university"></i>
@@ -205,9 +263,10 @@ function renderStaticTexts() {
 	`);
 
 	$('.navigation-tabs-container').empty();
-	// $('#navigation-tab-farms').append(getTabHTML('farms'));
 	$('#store-navigation-tab').append(getStoreTabHTML());
+	$('#guide-navigation-tab').append(getGuideTabHTML());
 	$('#navigation-tab-upgrades').append(getUpgradesTabHTML());
+	$('#navigation-tab-equipments').append(getEquipmentsTabHTML());
 	$('#owned-vehicle-navigation-tab').append(getOwnedVehicleTabHTML());
 }
 
@@ -278,23 +337,69 @@ function renderDeliveriesPage(fishing_available_contracts, fishing_life_users) {
 	}
 }
 
-function renderStorePage(available_items_store) {
+
+function renderDivesPage(fishing_available_dives, fishing_life_users) {
+	$('#list-available-dives').empty();
+	for (const dive of fishing_available_dives) {
+		let reward_html = ``;
+		let reward_icon = ``;
+		if (dive.money_reward) {
+			reward_icon = 'coins';
+			reward_html = Utils.currencyFormat(dive.money_reward, 0);
+		} else {
+			let items = JSON.parse(dive.item_reward);
+			reward_icon = 'box';
+			reward_html = `${items.amount}x ${items.display_name}`;
+		}
+		let start_button = `<button onclick="startDive(${dive.id})" type="button" class="btn btn-primary btn-block"><small>${Utils.translate('dives_start_button')}</small></button>`;
+		if (fishing_life_users.user_id == dive.progress) {
+			start_button = `<button onclick="cancelDive()" type="button" class="btn btn-outline-danger btn-block"><small>${Utils.translate('dives_cancel_button')}</small></button>`;
+		}
+
+		$('#list-available-dives').append(`
+				<div class="col-3 mb-3">
+					<div class="card h-100">
+						<div>
+							<img src="${dive.image}" class="card-img-top w-100">
+						</div>
+						<div class="card-body pt-2 px-0">
+							<div class="mx-3">
+								<h6 style="font-size: 17px; font-weight: 600;">${dive.name}</h6>
+							</div>
+							<div class="mx-3">
+								<h6>${dive.description}</h6>
+							</div>
+							<div class="my-2 card-line"></div>
+							<div class="mx-3 d-flex align-items-center">
+								<i class="fa-solid fa-${reward_icon} text-primary"></i>
+								<div class="d-flex flex-column ml-2">
+									<span class="small text-muted">${Utils.translate('deliveries_reward')}</span>
+									<span style="font-weight: 600;">${reward_html}</span>
+								</div>
+							</div>
+							<div class="my-2 card-line"></div>
+							<div class="mx-4">
+								${start_button}
+							</div>
+						</div>
+					</div>
+				</div>
+			`);
+	}
+}
+
+function renderStorePage(available_items_store,available_vehicles,available_boats,available_properties,owned_properties) {
 	$('#store-vehicle-page-list').empty();
 	$('#store-boat-page-list').empty();
 	$('#store-property-page-list').empty();
-	for (const vehicleIdx of Object.keys(available_items_store.vehicle)) {
+	for (const vehicleIdx of available_vehicles) {
 		const vehicle = available_items_store.vehicle[vehicleIdx]
 		if (vehicle) {
 			let button_html = `<button onclick="buyVehicle('${vehicleIdx}','vehicle')" type="button" class="btn btn-primary btn-block mt-4"><small>${Utils.translate('store_page_vehicle_buy')}</small></button>`
-			let store_vehicle_locked_background = ``
-			//if (garage_upgrade_level < vehicle.level) {
-			//	button_html = `<div class="d-flex align-items-center"><i class="fa-solid fa-lock text-muted"></i><span class=" ml-2 small">${Utils.translate('store_page_vehicle_unlock_text').format(vehicle.level)}</span></div>`
-			//	store_locked_background = `store-locked-background`
-			//}
 			$('#store-vehicle-page-list').append(`
 			<div class="col-3 mb-3">
 			<div class="card h-100">
-				<div class="card ${store_vehicle_locked_background}">
+				<div class="card">
 					<img src="${vehicle.image}" class="card-img-top w-100">
 					<div class="card-body pt-0 px-0 pb-2">
 						<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('store_page_vehicle_name')}</span>
@@ -318,19 +423,14 @@ function renderStorePage(available_items_store) {
 		}
 	}	
 	
-	for (const boatIdx of Object.keys(available_items_store.boat)) {
+	for (const boatIdx of available_boats) {
 		const boat = available_items_store.boat[boatIdx]
 		if (boat) {
 			let button_html = `<button onclick="buyVehicle('${boatIdx}','boat')" type="button" class="btn btn-primary btn-block mt-4"><small>${Utils.translate('store_buy_boat')}</small></button>`
-			let store_boat_locked_background = ``
-			//if (garage_upgrade_level < vehicle.level) {
-			//	button_html = `<div class="d-flex align-items-center"><i class="fa-solid fa-lock text-muted"></i><span class=" ml-2 small">${Utils.translate('store_page_vehicle_unlock_text').format(vehicle.level)}</span></div>`
-			//	store_locked_background = `store-locked-background`
-			//}
 			$('#store-boat-page-list').append(`
 			<div class="col-3 mb-3">
 			<div class="card h-100">
-				<div class="card ${store_boat_locked_background}">
+				<div class="card">
 					<img src="${boat.image}" class="card-img-top w-100">
 					<div class="card-body pt-0 px-0 pb-2">
 						<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('store_page_boat_name')}</span>
@@ -354,15 +454,15 @@ function renderStorePage(available_items_store) {
 		}
 	}	
 
-	for (const propertyIdx of Object.keys(available_items_store.property)) {
+	for (const propertyIdx of available_properties) {
 		const property = available_items_store.property[propertyIdx]
 		if (property) {
 			let button_html = `<button onclick="buyProperty('${propertyIdx}','property')" type="button" class="btn btn-primary btn-block mt-4"><small>${Utils.translate('store_buy_property')}</small></button>`
 			let store_property_locked_background = ``
-			//if (garage_upgrade_level < vehicle.level) {
-			//	button_html = `<div class="d-flex align-items-center"><i class="fa-solid fa-lock text-muted"></i><span class=" ml-2 small">${Utils.translate('store_page_vehicle_unlock_text').format(vehicle.level)}</span></div>`
-			//	store_locked_background = `store-locked-background`
-			//}
+			if (owned_properties.filter(p => p.property ==propertyIdx).length > 0) {
+				button_html = `<div class="d-flex align-items-center"><i class="fa-solid fa-lock text-muted"></i><span class=" ml-2 small">${Utils.translate('store_page_property_owned')}</span></div>`
+				store_locked_background = `store-locked-background`
+			}
 			$('#store-property-page-list').append(`
 			<div class="col-3 mb-3">
 			<div class="card h-100">
@@ -406,7 +506,135 @@ function renderStorePage(available_items_store) {
 	}	
 }
 
-
+function renderGuidePage(fishs_available,sea,lake,swan){
+	$('#guide-all-page-list').empty();
+	$('#guide-sea-page-list').empty();
+	$('#guide-lake-page-list').empty();
+	$('#guide-swan-page-list').empty();
+	let colorLake = 'blue'
+	let colorSwan = 'green'
+	let colorSea = 'lightblue'
+	let levelSea = 0 ;
+	for (const difSea of sea) {
+		levelSea++;
+		for(const seaIdx of difSea){
+		const fish = fishs_available[seaIdx]
+		if (fish) {
+			let fishHtml = `
+				<div class="col-3 mb-3">
+				<div class="card h-100">
+					<div class="card" style= "border: 1px solid ${colorSea}">
+						<h5 class="mb-2" style="text-align:center; color:${colorSea}">${Utils.translate('sea')}</h5>
+						<img src="${fish.img}" class="card-img-top w-50" style= "align-self:center">
+						<div class="card-body pt-0 px-0 pb-2">
+							<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('level_abbreviate')} ${levelSea}</span>
+								<h6>${fish.name}</h6>
+							</div>
+							<hr class="mt-2 mx-3">
+							<div class="d-flex flex-row justify-content-between px-3">
+								<div class="d-flex flex-column"><span class="text-muted">${Utils.translate('guide_page_fish_value')}</span></div>
+								<div class="d-flex flex-column">
+									<h5 class="mb-0">${Utils.currencyFormat(fish.sale_value)}</h5>
+								</div>
+							</div>
+							<hr class="mt-2 mx-3">
+							<div class="d-flex flex-row justify-content-between px-3">
+								<div class="d-flex flex-column"><span class="text-muted">${Utils.translate('guide_page_fish_weight')}</span></div>
+								<div class="d-flex flex-column">
+									<h5 class="mb-0">${fish.weight}</h5>
+								</div>
+							</div>
+						</div>
+					</div>
+					</div>
+					</div>
+				`
+				$('#guide-all-page-list').append(fishHtml);
+				$('#guide-sea-page-list').append(fishHtml);
+			}
+		}
+	}	
+	let levelLake = 0;
+	for (const difLake of lake) {
+		levelLake++;
+		for(const lakeIdx of difLake){
+			const fish = fishs_available[lakeIdx]
+			if (fish) {
+				let fishHtml = `
+					<div class="col-3 mb-3">
+					<div class="card h-100">
+					<div class="card" style= "border: 1px solid ${colorLake}">
+						<h5 class="mb-2" style="text-align:center; color:${colorLake}">${Utils.translate('lake')}</h5>
+							<img src="${fish.img}" class="card-img-top w-50" style= "align-self:center">
+							<div class="card-body pt-0 px-0 pb-2">
+								<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('level_abbreviate')} ${levelLake}</span>
+									<h6>${fish.name}</h6>
+								</div>
+								<hr class="mt-2 mx-3">
+								<div class="d-flex flex-row justify-content-between px-3">
+									<div class="d-flex flex-column"><span class="text-muted">${Utils.translate('guide_page_fish_value')}</span></div>
+									<div class="d-flex flex-column">
+										<h5 class="mb-0">${Utils.currencyFormat(fish.sale_value)}</h5>
+									</div>
+								</div>
+								<hr class="mt-2 mx-3">
+								<div class="d-flex flex-row justify-content-between px-3">
+									<div class="d-flex flex-column"><span class="text-muted">${Utils.translate('guide_page_fish_weight')}</span></div>
+									<div class="d-flex flex-column">
+										<h5 class="mb-0">${fish.weight}</h5>
+									</div>
+								</div>
+							</div>
+						</div>
+						</div>
+						</div>
+					`
+					$('#guide-all-page-list').append(fishHtml);
+					$('#guide-lake-page-list').append(fishHtml);
+			}
+		}
+	}		
+	let levelSwan = 0;
+	for (const swanDif of swan) {
+		levelSwan ++;
+		for(const swanIdx of swanDif){
+			const fish = fishs_available[swanIdx]
+			if (fish) {
+				let fishHtml = `
+					<div class="col-3 mb-3">
+					<div class="card h-100">
+					<div class="card" style= "border: 1px solid ${colorSwan}">
+						<h5 class="mb-2" style="text-align:center; color:${colorSwan}">${Utils.translate('swan')}</h5>
+							<img src="${fish.img}" class="card-img-top w-50" style= "align-self:center">
+							<div class="card-body pt-0 px-0 pb-2">
+								<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('level_abbreviate')} ${levelSwan}</span>
+									<h6>${fish.name}</h6>
+								</div>
+								<hr class="mt-2 mx-3">
+								<div class="d-flex flex-row justify-content-between px-3">
+									<div class="d-flex flex-column"><span class="text-muted">${Utils.translate('guide_page_fish_value')}</span></div>
+									<div class="d-flex flex-column">
+										<h5 class="mb-0">${Utils.currencyFormat(fish.sale_value)}</h5>
+									</div>
+								</div>
+								<hr class="mt-2 mx-3">
+								<div class="d-flex flex-row justify-content-between px-3">
+									<div class="d-flex flex-column"><span class="text-muted">${Utils.translate('guide_page_fish_weight')}</span></div>
+									<div class="d-flex flex-column">
+										<h5 class="mb-0">${fish.weight}</h5>
+									</div>
+								</div>
+							</div>
+						</div>
+						</div>
+						</div>
+					`
+					$('#guide-all-page-list').append(fishHtml);
+					$('#guide-swan-page-list').append(fishHtml);
+			}
+		}
+	}
+}
 function renderOwnedVehiclesPage(owned_vehicles,vehicles) {
 	$('#owned-vehicle-page-list').empty();
 	$('#owned-boat-page-list').empty();
@@ -549,33 +777,24 @@ function renderOwnedVehiclesPage(owned_vehicles,vehicles) {
 	}		
 }
 
-function renderOwnedPropertiesPage(owned_properties,properties) {
+function renderOwnedPropertiesPage(owned_properties, properties, fishs_available) {
 	$('#owned-property-page-list').empty();
 	for (const property_data of owned_properties) {
-		const property = properties.vehicle[property_data.property]
+		const property = properties.property[property_data.property]
 		if (property) {
-			let vehicle_health_str = ``;
-			let vehicle_fuel_str = ``;
+			let property_stock_str = ``;
 			let health_color = `success`;
-			let fuel_color = `amber`;
-			if (property_data.health < 900) {
-				let remaining_health = Math.floor((1000 - property_data.health)/10)
+			if (property_data.property_condition < 10) {
+				let remaining_health = 100 - property_data.property_condition
 				let total_repair_price = property.repair_price*remaining_health
-				vehicle_health_str = `<a class="dropdown-item text-black-50" onclick="repairVehicle('${property_data.id}')">${Utils.translate('vehicles_page_repair').format(Utils.currencyFormat(total_repair_price,0))}</a>`;
+				property_stock_str = `<a class="dropdown-item text-black-50" onclick="repairProperty('${property_data.property}')">${Utils.translate('vehicles_page_repair').format(Utils.currencyFormat(total_repair_price,0))}</a>`;
 
-				if (property_data.health < 200) {
+				if (property_data.property_condition < 200) {
 					health_color = "danger"
 				}
 			}
-			if (property_data.fuel < 90) {
-				let remaining_fuel = Math.floor(100 - property_data.fuel)
-				let total_refuel_price = property.refuel_price*remaining_fuel
-				vehicle_fuel_str = `<a class="dropdown-item text-black-50" onclick="refuelVehicle('${property_data.id}')">${Utils.translate('vehicles_page_refuel').format(Utils.currencyFormat(total_refuel_price,0))}</a>`;
-
-				if (property_data.fuel < 20) {
-					fuel_color = "danger"
-				}
-			}
+			var max_stock = property.warehouse_capacity
+			let stock_capacity_percent = numberFormat((property_data.stock.length * 100)/max_stock,1);	
 			$('#owned-property-page-list').append(`
 				<li class="d-flex card-theme justify-content-between">
 					<div style="width: 300px;" class="d-flex flex-row align-items-center">
@@ -583,50 +802,52 @@ function renderOwnedPropertiesPage(owned_properties,properties) {
 						<div class="ml-2">
 							<h6 class="mb-0">${property.name}</h6>
 							<div class="d-flex flex-row mt-1 text-black-50 text-nowrap small">
-								<div style="min-width: 110px;" ><i class="fas fa-tag"></i><span class="small ml-2">${Utils.translate('vehicles_page_vehicle_plate')} ${JSON.parse(property_data.properties).plate ?? Utils.translate('vehicles_page_unregistered')}</span></div>
-								<div class="ml-3"><i class="fas fa-route"></i><span class="small ml-2">${Utils.translate('vehicles_page_distance').format(Utils.numberFormat(property_data.traveled_distance/1000,2))}</span></div>
+								<div class="ml-3"><i class="fas fa-route"></i><span class="small ml-2">${Utils.translate('owned_property_location').format(property.location)}</span></div>
 							</div>
 						</div>
 					</div>
-					<div class="d-flex flex-row text-black-50 small">
+					<div class="d-flex flex-row text-black-50 small"  style="flex: 2;">
 						<div class="d-flex align-items-center">
 							<img src="images/car-engine.png" width="35px">
 							<div class="ml-1">
-								<span>${Utils.translate('vehicles_page_vehicle_condition')}</span>
-								<div id="vehicle-health" class="progress mt-0 mb-0" style="height: 10px; width: 200px;"><div class="progress-bar bg-${health_color}" role="progressbar" style="width: ${property_data.health/10}%" aria-valuenow="0.0" aria-valuemin="0" aria-valuemax="100"></div></div>
-							</div>
+								<span>${Utils.translate('owned_properties_stock_percentage')}</span>
+								<div class="progress mt-0 mb-0" style="height: 10px; width: 200px;"><div class="progress-bar bg-primary" role="progressbar" style="width: ${stock_capacity_percent}%" aria-valuenow="0.0" aria-valuemin="0" aria-valuemax="100"></div></div>								
+								</div>
 						</div>
-						<div class="d-flex align-items-center ml-3">
-							<img src="images/fuel.png" width="35px">
+					</div>
+					<div class="d-flex flex-row text-black-50 small"  style="flex: 2;">
+						<div class="d-flex align-items-center">
+							<img src="images/car-engine.png" width="35px">
 							<div class="ml-1">
-								<span>${Utils.translate('vehicles_page_vehicle_fuel')}</span>
-								<div id="vehicle-health" class="progress mt-0 mb-0" style="height: 10px; width: 200px;"><div class="progress-bar bg-${fuel_color}" role="progressbar" style="width: ${property_data.fuel}%" aria-valuenow="0.0" aria-valuemin="0" aria-valuemax="100"></div></div>
-							</div>
+								<span>${Utils.translate('owned_properties_stock_condition')}</span>
+								<div class="progress mt-0 mb-0" style="height: 10px; width: 200px;"><div class="progress-bar bg-${health_color}" role="progressbar" style="width: ${property_data.property_condition}%" aria-valuenow="0.0" aria-valuemin="0" aria-valuemax="100"></div></div>								
+								</div>
 						</div>
 					</div>
 					<div class="d-flex flex-row align-items-center mr-2">
 						<div class="dropdown">
 							<svg data-toggle="dropdown" class="dropdown-options-svg" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="512" height="512" x="0" y="0" viewBox="0 0 515.555 515.555" style="enable-background:new 0 0 512 512" xml:space="preserve"><g><path xmlns="http://www.w3.org/2000/svg" d="m496.679 212.208c25.167 25.167 25.167 65.971 0 91.138s-65.971 25.167-91.138 0-25.167-65.971 0-91.138 65.971-25.167 91.138 0" data-original="#000000" style="" class=""></path><path xmlns="http://www.w3.org/2000/svg" d="m303.347 212.208c25.167 25.167 25.167 65.971 0 91.138s-65.971 25.167-91.138 0-25.167-65.971 0-91.138 65.971-25.167 91.138 0" data-original="#000000" style="" class=""></path><path xmlns="http://www.w3.org/2000/svg" d="m110.014 212.208c25.167 25.167 25.167 65.971 0 91.138s-65.971 25.167-91.138 0-25.167-65.971 0-91.138 65.971-25.167 91.138 0" data-original="#000000" style="" class=""></path></g></svg>
 							<div class="dropdown-menu">
-								${vehicle_health_str}
-								${vehicle_fuel_str}
-								<a class="dropdown-item text-black-50" onclick="spawnVehicle('${property_data.id}')">${Utils.translate('vehicles_page_spawn')}</a>
-								<a class="dropdown-item" onclick="sellVehicle('${property_data.id}')" style="color:#ff0000c2;">${Utils.translate('vehicles_page_sell')}</a>
+								${property_stock_str}
+								<a class="dropdown-item text-black-50" id="seePropertyButton">${Utils.translate('owned_properties_see')}</a>
+								<a class="dropdown-item" onclick="sellProperty('${property_data}')" style="color:#ff0000c2;">${Utils.translate('vehicles_page_sell')}</a>
 							</div>
 						</div>
 					</div>
 				</li>
 			`);
+			$("#seePropertyButton").bind('click',{ param: property_data, param1:fishs_available} ,seePropertyStock)
 		}
 	}	
 }
 
-function renderStockPage(property){
+function  renderStockPage(property, properties,players_items_fishing,fishs_available){
 	// stock property page modal
-	var max_stock  = 100 //TODO UPGRADES 
+	var arr_stock = property.stock
+	var max_stock = properties.property[property.property].warehouse_capacity
 	let stock_capacity_percent = numberFormat((property.stock_amount * 100)/max_stock,1);
-	$('#owned-property-title-div').html(`
-		<h4 class="text-uppercase">${Utils.translate('stock_title')}</h4>
+	$('#stock-title-div').html(`
+		<h4 class="text-uppercase">${Utils.translate('stock_title')} ${property.name} </h4>
 		<p>${Utils.translate('stock_page_desc')}</p>
 		<div class="d-flex">
 			<div style="width: 100%;">
@@ -638,30 +859,26 @@ function renderStockPage(property){
 					
 				</div>
 			</div>
-			<div class="d-flex align-items-center">
-				<button style="height: fit-content;" data-toggle="modal" data-target="#exportStockModal" class="btn btn-primary ml-4 text-nowrap" id="stock-button-export"></button>
-			</div>
 		</div>
 	`);
-
+	$('#stock-page-th-name').text(Lang[lang]['stock_page_header_name']);
+	$('#stock-page-th-weight').text(Lang[lang]['stock_page_header_weight']);
+	$('#stock-page-th-amount').text(Lang[lang]['stock_page_header_amount']);
+	$('#stock-player-page-th-name').text(Lang[lang]['stock_page_header_name']);
+	$('#stock-player-page-th-weight').text(Lang[lang]['stock_page_header_weight']);
+	$('#stock-player-page-th-amount').text(Lang[lang]['stock_page_header_amount']);
+	$('#withdraw-item-modal-cancel').text(`${Lang[lang]['stock_page_withdraw_modal_cancel']}`);
+	$('#withdraw-item-modal-submit').text(`${Lang[lang]['confirm_button_modal']}`);
+	$('#withdraw-item-modal-amount').text(`${Lang[lang]['stock_page_withdraw_modal_amount']}`);
+	$('#deposit-item-modal-cancel').text(`${Lang[lang]['stock_page_withdraw_modal_cancel']}`);
+	$('#deposit-item-modal-submit').text(`${Lang[lang]['confirm_button_modal']}`);
+	$('#deposit-item-modal-amount').text(`${Lang[lang]['stock_page_withdraw_modal_amount']}`);
+	$('#deposit-item-modal').attr('value',`${property.property}`);
+	$('#withdraw-item-modal').attr('value',`${property.property}`);
+	$('#stock-title').text(Lang[lang]['stock_page_bar_title']);
 	$('#stock-values').text(`${property.stock_amount}/${max_stock} ${Utils.translate('weight_unit')}`);
 	$('#stock-progress-bar').html(`<div class="progress-bar bg-primary" role="progressbar" style="width: ${stock_capacity_percent}%" aria-valuenow="${stock_capacity_percent}" aria-valuemin="0" aria-valuemax="100">${stock_capacity_percent}%</div>`);
-	
-	$('#export-stock-form-container').html(`
-		<p id="modal-p-export-stock">${Utils.translate('stock_page_export_modal_desc')}</p>
-		<label class="mb-0" for="input-export-stock-select-item">${Utils.translate('stock_pag>e_modal_label_item')}</label>
-		<select id="input-export-stock-select-item" class="form-control mb-2" name="select" style="width:100%;" onchange="setMaxInputExportStock();" required="required"></select>
-		<label class="mb-0" for="input-export-stock-select-vehicle">${Utils.translate('stock_page_modal_label_vehicle')}</label>
-		<select id="input-export-stock-select-vehicle" class="form-control mb-2" name="select" style="width:100%;" onchange="setMaxInputExportStock();" required="required"></select>
-		<div id="export-stock-form-input-container" class="d-flex flex-column align-items-start">
-
-		</div>
-	`);
-	$('#input-export-stock-select-item').empty();
-	$(`#stock-button-export`).click({factory_stock: property.stock, relationship_upgrade: property.relationship_upgrade}, openExportStockModal);
-
 	$('#stock-table-body').empty();
-	/*let upgrade = config.factory.upgrades.relationship[property.relationship_upgrade-1]
 	if (Object.keys(arr_stock).length > 0) {
 		arr_stock = Object.keys(arr_stock).sort().reduce(
 			(obj, key) => { 
@@ -672,12 +889,15 @@ function renderStockPage(property){
 		);
 		
 		for (const stock_item in arr_stock) {
-			if (config.items[stock_item]) {
+			let item = null
+			if(stock_item.toLowerCase().includes('fish')){
+				item = fishs_available[stock_item]
+			} 
+			if (item) {
 				$('#stock-table-body').append(`
 					<tr data-toggle="modal" data-target="#withdraw-item-modal" data-item="${stock_item}" data-amount="${arr_stock[stock_item]}" class="border-right border-left border-bottom">
-						<td class="d-flex align-items-center text-left"><img src="${config.items[stock_item].img}" class="mr-2" style="width: 40px;">${config.items[stock_item].name}</td>
-						<td class="align-middle">${config.items[stock_item].weight} ${Utils.translate('weight_unit')}</td>
-						<td class="align-middle">${Utils.currencyFormat(config.items[stock_item].price_to_export + (config.items[stock_item].price_to_export * (upgrade?.level_reward ?? 0)/100))}</td>
+						<td class="d-flex align-items-center text-left"><img src="${item.img}" class="mr-2" style="width: 40px;">${item.name}</td>
+						<td class="align-middle">${item.weight} ${Utils.translate('weight_unit')}</td>
 						<td class="align-middle">${arr_stock[stock_item]}</td>
 					</tr>
 				`);
@@ -695,16 +915,22 @@ function renderStockPage(property){
 
 	let has_readable_inventory_item = false
 	$('#stock-player-table-body').empty();
-	for (const inventory_item of item.data.player_inventory) {
-		if (inventory_item && config.items[inventory_item.name]) {
-			has_readable_inventory_item = true
-			$('#stock-player-table-body').append(`
-				<tr data-toggle="modal" data-target="#deposit-item-modal" data-item="${inventory_item.name}" data-amount="${inventory_item.amount}" class="border-right border-left border-bottom">
-					<td class="d-flex align-items-center text-left"><img src="${config.items[inventory_item.name].img}" class="mr-2" style="width: 40px;">${config.items[inventory_item.name].name}</td>
-					<td class="align-middle">${config.items[inventory_item.name].weight} ${Utils.translate('weight_unit')}</td>
-					<td class="align-middle">${inventory_item.amount}</td>
-				</tr>
-			`);
+	for (const inventory_item of players_items_fishing) {
+		if(inventory_item){
+			let item = null
+			if(inventory_item.name.toLowerCase().includes('fish')){
+				item = fishs_available[inventory_item.name]
+			}
+			if (item) {
+				has_readable_inventory_item = true
+				$('#stock-player-table-body').append(`
+					<tr data-toggle="modal" data-target="#deposit-item-modal" data-item="${inventory_item.name}" data-amount="${inventory_item.amount}" class="border-right border-left border-bottom">
+						<td class="d-flex align-items-center text-left"><img src="${item.img}" class="mr-2" style="width: 40px;">${inventory_item.label}</td>
+						<td class="align-middle">${item.weight} ${Utils.translate('weight_unit')}</td>
+						<td class="align-middle">${inventory_item.amount}</td>
+					</tr>
+				`);
+			}	
 		}
 	}
 	if (!has_readable_inventory_item) {
@@ -714,8 +940,6 @@ function renderStockPage(property){
 			</tr>
 		`);
 	}
-*/
-
 }
 
 function renderUpgradesPage(upgrades,user){ 
@@ -726,6 +950,19 @@ function renderUpgradesPage(upgrades,user){
 		for (const upgrade of upgrades[upgrade_type]) {
 			let current_level = user[upgrade_type+'_upgrade']
 			$('#'+upgrade_type+'-upgrades-list').append(getUpgradeItemHTML(upgrade,upgrade_type,level,current_level));
+			level++;
+		}
+	}
+}
+
+function renderEquipmentsPage(equipments,user){ 
+	$('.equipment-list').empty();
+	let level = 1
+	for (const equipment_type in equipments) {
+		level = 1
+		for (const equipment of equipments[equipment_type]) {
+			let current_level = user[equipment_type+'_upgrade']
+			$('#'+equipment_type+'-equipments-list').append(getEquipmentItemHTML(equipment,equipment_type,level,current_level));
 			level++;
 		}
 	}
@@ -790,15 +1027,27 @@ function getStoreTabHTML() {
 	+ getTabHTML('store','store-property',Utils.translate('navigation_tab_store_property'))
 }
 
+function getGuideTabHTML() {
+	return getTabHTML('guide','guide-all',Utils.translate('navigation_tab_guide_all'),true)
+	+ getTabHTML('guide','guide-sea',Utils.translate('sea'))
+	+ getTabHTML('guide','guide-lake',Utils.translate('lake'))
+	+ getTabHTML('guide','guide-swan',Utils.translate('swan'))
+}
+
 
 function getUpgradesTabHTML() {
-	return getTabHTML('upgrades','upgrades-vehicles',Lang[lang]['navigation_tab_upgrades_vehicles'],true)
-	+ getTabHTML('upgrades','upgrades-boats',Lang[lang]['navigation_tab_upgrades_boats'])
-	+ getTabHTML('upgrades','upgrades-properties',Lang[lang]['navigation_tab_upgrades_properties'])
-	+ getTabHTML('upgrades','upgrades-rods',Lang[lang]['navigation_tab_upgrades_rods'])
-	+ getTabHTML('upgrades','upgrades-lake',Lang[lang]['navigation_tab_upgrades_lake'])
-	+ getTabHTML('upgrades','upgrades-swan',Lang[lang]['navigation_tab_upgrades_swan'])
-	+ getTabHTML('upgrades','upgrades-sea',Lang[lang]['navigation_tab_upgrades_sea'])
+	return getTabHTML('upgrades','vehicles-upgrades',Lang[lang]['navigation_tab_upgrades_vehicles'],true)
+	+ getTabHTML('upgrades','boats-upgrades',Lang[lang]['navigation_tab_upgrades_boats'])
+	+ getTabHTML('upgrades','lake-upgrades',Lang[lang]['navigation_tab_upgrades_lake'])
+	+ getTabHTML('upgrades','swan-upgrades',Lang[lang]['navigation_tab_upgrades_swan'])
+	+ getTabHTML('upgrades','sea-upgrades',Lang[lang]['navigation_tab_upgrades_sea'])
+}
+
+function getEquipmentsTabHTML() {
+	return getTabHTML('equipments','windlass-equipments',Lang[lang]['navigation_tab_equipments_windlass'],true)
+	+ getTabHTML('equipments','rod-equipments',Lang[lang]['navigation_tab_equipments_rod'])
+	+ getTabHTML('equipments','bait-equipments',Lang[lang]['navigation_tab_equipments_bait'])
+	+ getTabHTML('equipments','gimp-equipments',Lang[lang]['navigation_tab_equipments_gimp'])
 }
 
 function getOwnedVehicleTabHTML() {
@@ -824,16 +1073,13 @@ function getTabHTML(page,tab,tab_title,selected) {
 
 function getUpgradeItemHTML(upgrade,upgrade_type,level,current_level) {
 	current_level++;
-	let upgrade_button = `<button style="height:38px;" class="btn btn-primary btn-block" onclick="buyUpgrade('${upgrade_type}',${level})">${currencyFormat(upgrade.price,0)}</button>`
+	let upgrade_button = `<button style="height:38px;" class="btn btn-primary btn-block" onclick="buyUpgrade('${upgrade_type}',${level})">${upgrade.points_required} ${Lang[lang]['skill_point']}</button>`
 	if (level > current_level) {
 		upgrade_button = `<button style="height:38px;" class="btn btn-secondary btn-block"><i class="fa-solid fa-lock" disabled></i></button>`
 	} else if (level < current_level) {
 		upgrade_button = `<button style="height:38px;" class="btn btn-outline-success btn-block"><i class="fa-solid fa-check"></i></button>`
 	}
 	let upgrade_description = Lang[lang]['upgrade_page_' + upgrade_type + '_level'].format(upgrade.level_reward)
-	if (upgrade_type == 'stock') {
-		upgrade_description = Lang[lang]['upgrade_page_' + upgrade_type + '_level'].format(upgrade.level_reward,upgrade.trademarket_reward)
-	}
 	return `
 		<li class="d-flex card-theme align-items-center">
 			<img style="width: 8%;" src="${upgrade.icon}">
@@ -851,6 +1097,31 @@ function getUpgradeItemHTML(upgrade,upgrade_type,level,current_level) {
 	`
 }
 
+function getEquipmentItemHTML(equipment,equipment_type,level,current_level) {
+	current_level++;
+	let equipment_button = `<button style="height:38px;" class="btn btn-primary btn-block" onclick="buyEquipment('${equipment_type}',${level},${equipment.price})"> ${Lang[lang]['equipment_price'].format(Utils.currencyFormat(equipment.price))}</button>`
+	if (level > current_level) {
+		equipment_button = `<button style="height:38px;" class="btn btn-secondary btn-block"><i class="fa-solid fa-lock" disabled></i></button>`
+	} else if (level < current_level) {
+		equipment_button = `<button style="height:38px;" class="btn btn-outline-success btn-block"><i class="fa-solid fa-check"></i></button>`
+	}
+	let equipment_description = Lang[lang]['equipment_page_' + equipment_type + '_level'].format(equipment.level_reward)
+	return `
+		<li class="d-flex card-theme align-items-center">
+			<img style="width: 8%;" src="${equipment.icon}">
+			<div style="width: 20%;" class="ml-2">
+				<small class="text-black-50">${Lang[lang]['equipment_page_' + equipment_type]}</small>
+				<h4 class="font-weight-semi-bold">${Lang[lang]['level_abbreviate']}${level}</h4>
+			</div>
+			<div style="width: 55%;">
+				<span class="text-success">${equipment_description}</span>
+			</div>
+			<div style="width: 15%;">
+				${equipment_button}
+			</div>
+		</li>
+	`
+}
 /*=================
 	CALLBACKS
 =================*/
@@ -865,6 +1136,14 @@ function startContract(contract_id){
 
 function cancelContract(){
 	Utils.post("cancelContract",{})
+}
+
+function startDive(dive_id){
+	Utils.post("startDive",{dive_id:dive_id})
+}
+
+function cancelDive(){
+	Utils.post("cancelDive",{})
 }
 
 function viewLocation(contract_id){
@@ -883,6 +1162,14 @@ function buyVehicle(vehicle_id,type) {
 	Utils.post("buyVehicle",{vehicle_id,type})
 }
 
+function buyUpgrade(upgrade_type,level){
+	Utils.post("buyUpgrade",{upgrade_type,level})
+}
+
+function buyEquipment(equipment_type,level, price){
+	Utils.post("buyEquipment",{equipment_type,level,price})
+}
+
 function repairVehicle(vehicle_id) {
 	Utils.post("repairVehicle",{vehicle_id})
 }
@@ -897,6 +1184,54 @@ function sellVehicle(vehicle_id) {
 }
 function buyProperty(property_id,type) {
 	Utils.post("buyProperty",{property_id,type})
+}
+function sellProperty(property_id,type) {
+	Utils.post("sellPropertyy",{property_id})
+}
+
+function seePropertyStock(event) {
+	// stock property page modal
+	var property = event.data.param
+	var fishs_available = event.data.param1
+	var arr_stock = JSON.parse(property.stock)
+	$('#stock-page-th-name-modal').text(Lang[lang]['stock_page_header_name']);
+	$('#stock-page-th-weight-modal').text(Lang[lang]['stock_page_header_weight']);
+	$('#stock-page-th-amount-modal').text(Lang[lang]['stock_page_header_amount']);
+	$('#stock-table-body-modal').empty();
+	if (Object.keys(arr_stock).length > 0) {
+		arr_stock = Object.keys(arr_stock).sort().reduce(
+			(obj, key) => { 
+			obj[key] = arr_stock[key]; 
+			return obj;
+			}, 
+			{}
+		);
+		
+		for (const stock_item in arr_stock) {
+			let item = null
+			if(stock_item.toLowerCase().includes('fish')){
+				item = fishs_available[stock_item]
+			}
+			if (item) {
+				$('#stock-table-body-modal').append(`
+					<tr class="border-right border-left border-bottom">
+						<td class="d-flex align-items-center text-left"><img src="${item.img}" class="mr-2" style="width: 40px;">${item.name}</td>
+						<td class="align-middle">${item.weight} ${Utils.translate('weight_unit')}</td>
+						<td class="align-middle">${arr_stock[stock_item]}</td>
+					</tr>
+				`);
+			} else {
+				console.log(`Item '${stock_item}' from your stock does not exist in config, contact the server owner to remove that item from your database`)
+			}
+		}
+	} else {
+		$('#stock-table-body').append(`
+			<tr class="border-right border-left border-bottom">
+				<td colspan="4">${Utils.translate('stock_page_table_empty')}</td>
+			</tr>
+		`);
+	}
+	$("#stock-modal").modal()
 }
 
 $(document).ready( function() {
@@ -938,10 +1273,161 @@ $(document).ready( function() {
 		Utils.post("withdrawMoney",{amount:form[0].value})
 	});
 
+	$("#form-withdraw-item").on('submit', function(e){
+		e.preventDefault();
+		var form = $('#form-withdraw-item').serializeArray();
+		let item = $('#withdraw-modal-item-amount').data('item');
+		let property = $('#withdraw-item-modal').attr('value');
+		$('#withdraw-modal-item-amount').val(0);
+		$('#add-button-withdraw').prop('disabled',false);
+		$('#subtract-button-withdraw').prop('disabled',true);
+		$("#withdraw-item-modal").modal('hide');
+		Utils.post("withdrawItem",{amount:form[0].value,item,property})
+	});
+
+	$("#form-deposit-item").on('submit', function(e){
+		e.preventDefault();
+		var form = $('#form-deposit-item').serializeArray();
+		let item = $('#deposit-modal-item-amount').data('item');
+		let property = $('#deposit-item-modal').attr('value');
+		$('#deposit-modal-item-amount').val(0);
+		$('#add-button-deposit').prop('disabled',false);
+		$('#subtract-button-deposit').prop('disabled',true);
+		$("#deposit-item-modal").modal('hide');
+		Utils.post("depositItem",{amount:form[0].value,item, property})
+	});
+
 	$("#form-loan").on('submit', function(e){
 		e.preventDefault();
 		var form = $('#form-loan').serializeArray();
 		$("#loans-modal").modal('hide');
 		Utils.post("loan",{loan_id:form[0].value})
 	});
+
+	
+
+	$('#withdraw-item-modal').on('show.bs.modal', function (event) {
+		var button = $(event.relatedTarget);
+		var item = button.data('item');
+		var amount = button.data('amount');
+		let fishs_available = config.fishs_available
+		let itemModal =  null
+		if(item.toLowerCase().includes('fish')){
+			itemModal = fishs_available[item]
+		}
+		$('#withdraw-item-modal-item-name').text(itemModal.name);
+		$('#withdraw-item-modal-img').attr("src",itemModal.img);
+		$('#withdraw-item-modal-item-available').text(`${Lang[lang]['stock_page_withdraw_modal_item_available'].format(amount)}`);
+		$('#withdraw-modal-item-amount').val(0);
+		$('#form-withdraw-item-input-container').css('display','flex');
+		$('#withdraw-modal-item-amount').data('max',amount);
+		$('#withdraw-item-modal-title').text(`${Lang[lang]['stock_page_withdraw_modal_title']}`);
+		$('#withdraw-item-modal-img').css('width','80px');
+		$("#withdraw-modal-item-amount").attr("max",amount);
+		$("#withdraw-modal-item-amount").attr("oninput",`Utils.InvalidMsg(this,1,${amount});`);
+		$('#add-button-withdraw').prop('disabled',false);
+		$('#subtract-button-withdraw').prop('disabled',true);
+		$('#withdraw-modal-item-amount').data('item',item);
+	})
+
+	$('#deposit-item-modal').on('show.bs.modal', function (event) {
+		var button = $(event.relatedTarget);
+		var item = button.data('item');
+		var amount = button.data('amount');
+		let fishs_available = config.fishs_available
+		let itemModal =  null
+		if(item.toLowerCase().includes('fish')){
+			itemModal = fishs_available[item]
+		}
+		$('#deposit-item-modal-item-name').text(itemModal.name);
+		$('#deposit-item-modal-img').attr("src",itemModal.img);
+		$('#deposit-item-modal-item-available').text(`${Lang[lang]['stock_page_deposit_modal_item_available'].format(amount)}`);
+		$('#deposit-modal-item-amount').val(0);
+		$('#form-deposit-item-input-container').css('display','flex');
+		$('#deposit-modal-item-amount').data('max',amount);
+		$('#deposit-item-modal-title').text(`${Lang[lang]['stock_page_deposit_modal_title']}`);
+		$('#deposit-item-modal-img').css('width','80px');
+		$('#add-button-deposit').prop('disabled',false);
+		$('#subtract-button-deposit').prop('disabled',true);
+		$('#deposit-modal-item-amount').data('item',item);
+		$("#deposit-modal-item-amount").attr("max",amount);
+		$("#deposit-modal-item-amount").attr("oninput",`Utils.InvalidMsg(this,1,${amount});`);
+	})
+	
+	$("#subtract-button-deposit").on('click', function(e){
+		$('#add-button-deposit').prop('disabled',false);
+		let max_amount = $('#deposit-modal-item-amount').data('max');
+		let amount = $('#deposit-modal-item-amount').val();
+		if (--amount <= 0) {
+			amount = 0;
+			$(this).prop('disabled',true);
+		}
+		if (amount >= max_amount) {
+			amount = max_amount
+			$('#add-button-deposit').prop('disabled',true);
+		}
+		$('#deposit-modal-item-amount').val(amount);
+	});
+
+	$("#add-button-deposit").on('click', function(e){
+		$('#subtract-button-deposit').prop('disabled',false);
+		let max_amount = $('#deposit-modal-item-amount').data('max');
+		let amount = $('#deposit-modal-item-amount').val();
+		if (++amount >= max_amount) {
+			amount = max_amount
+			$(this).prop('disabled',true);
+		}
+		if (amount <= 0) {
+			amount = 0;
+			$('#subtract-button-deposit').prop('disabled',true);
+		}
+		$('#deposit-modal-item-amount').val(amount);
+	});
+
+	$("#subtract-button-withdraw").on('click', function(e){
+		$('#add-button-withdraw').prop('disabled',false);
+		let max_amount = $('#withdraw-modal-item-amount').data('max');
+		let amount = $('#withdraw-modal-item-amount').val();
+		if (--amount <= 0) {
+			amount = 0;
+			$(this).prop('disabled',true);
+		}
+		if (amount >= max_amount) {
+			amount = max_amount
+			$('#add-button-withdraw').prop('disabled',true);
+		}
+		$('#withdraw-modal-item-amount').val(amount);
+	});
+
+	$("#add-button-withdraw").on('click', function(e){
+		$('#subtract-button-withdraw').prop('disabled',false);
+		let max_amount = $('#withdraw-modal-item-amount').data('max');
+		let amount = $('#withdraw-modal-item-amount').val();
+		if (++amount >= max_amount) {
+			amount = max_amount
+			$(this).prop('disabled',true);
+		}
+		if (amount <= 0) {
+			amount = 0;
+			$('#subtract-button-withdraw').prop('disabled',true);
+		}
+		$('#withdraw-modal-item-amount').val(amount);
+	});
+
+	document.onkeyup = function(data){
+		if (data.which == 27){
+			if ($(".main-stock").is(":visible") || $(".main").is(":visible") ){
+				$(".modal").modal('hide');
+				Utils.post("close","")
+			}
+		}
+	};
+
 })
+function numberFormat(number,zeros) {
+	if (zeros != null) {
+		return new Intl.NumberFormat(config.format.location, { maximumFractionDigits: zeros, minimumFractionDigits: zeros }).format(number)
+	} else {
+		return new Intl.NumberFormat(config.format.location, {  }).format(number)
+	}
+}

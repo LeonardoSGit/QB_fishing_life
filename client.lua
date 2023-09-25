@@ -2,6 +2,7 @@ Utils = exports['lc_utils']:GetUtils()
 local menu_active = false
 local cooldown = nil
 local current_fishing_location_id;
+local current_property_location_id;
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- LOCATIONS
 -----------------------------------------------------------------------------------------------------------------------------------------	
@@ -41,36 +42,38 @@ function openFishingUiCallback(fishing_location_id)
 end
 
 -- Properties locations
-RegisterNetEvent('lc_fishing_life:setPropertiesBlips')
-AddEventHandler('lc_fishing_life:setPropertiesBlips', function(data)
-	local user_id = data.user_id
-	-- TODO: move isso pra funcao createMarkersThread e checa se o cara é dono ao chamar o evento TriggerServerEvent("lc_fishing_life:getDataProperty",fishing_property_id) inves de fazer verificacao no client (o certo é toda verificacao importante ser no server)
-	Citizen.CreateThread(function()
+
+function createMarkersPropertyThread()
+	Citizen.CreateThreadNow(function()
 		local timer = 2
 		while true do
 			timer = 3000
-			for k,property in pairs(data) do
-				if(property.user_id == property.original_user_id) then
-					local x,y,z = table.unpack(Config.available_items_store.property[property.property].location)
-					print_table(Config.available_items_store.property[property.property].location)
-					local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
-					if not menu_active and distance <= 20.0 then
+			for property_id, property_location_data in pairs(Config.available_items_store.property) do
+				if not menu_active then
+					local x,y,z = table.unpack(property_location_data.location)
+					if Utils.Entity.isPlayerNearCoords(x,y,z,20.0) then
 						timer = 2
-						Utils.Markers.drawMarker(21,x,y,z,0.5)
-						if distance <= 2.0 then
-							Utils.Markers.drawText3D(x,y,z-0.6,Utils.translate('open'))
-							if IsControlJustPressed(0,38) then
-								fishing_property_id = property.property
-								TriggerServerEvent("lc_fishing_life:getDataProperty",fishing_property_id)
-							end
-						end
+						Utils.Markers.createMarkerInCoords(property_id,x,y,z,Utils.translate('open'),openPropertyUiCallback)
 					end
 				end
 			end
 			Citizen.Wait(timer)
 		end
 	end)
-end)
+end
+
+function createTargetsPropertyThread()
+	Citizen.CreateThreadNow(function()
+		for fishing_location_id,fishing_location_data in pairs(Config.fishing_locations) do
+			local x,y,z = table.unpack(fishing_location_data.menu_location)
+			Utils.Target.createTargetInCoords(fishing_location_id,x,y,z,openFishingUiCallback,Utils.translate('open_target'),"fas fa-fish-fins","#2986cc")
+		end
+	end)
+end
+
+function openPropertyUiCallback(property_location_id)
+	TriggerServerEvent("lc_fishing_life:getDataProperty",property_location_id)
+end
 
 RegisterNetEvent('lc_fishing_life:open')
 AddEventHandler('lc_fishing_life:open', function(data,isUpdate)
@@ -88,13 +91,16 @@ AddEventHandler('lc_fishing_life:open', function(data,isUpdate)
 	end
 end)
 RegisterNetEvent('lc_fishing_life:openProperty')
-AddEventHandler('lc_fishing_life:openProperty', function(property)
+AddEventHandler('lc_fishing_life:openProperty', function(data, property)
+	TriggerScreenblurFadeIn(1000)
 	SendNUIMessage({ 
 		openPropertyUI = true,
 		property = property,
+		data = data,
 		utils = { config = Utils.Config, lang = Utils.Lang },
 		resourceName = GetCurrentResourceName()
 	})
+	SetNuiFocus(true,true)
 end)
 
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -134,15 +140,6 @@ function closeUI()
 	SendNUIMessage({ hidemenu = true })
 	TriggerScreenblurFadeOut(1000)
 end
-
------------------------------------------------------------------------------------------------------------------------------------------
--- addBlipProperty
------------------------------------------------------------------------------------------------------------------------------------------
-
-Citizen.CreateThread(function()
-    Wait(5000)
-    TriggerServerEvent("lc_fishing_life:getProperties")
-end)
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- FUNCTIONS
@@ -186,6 +183,39 @@ AddEventHandler('lc_fishing_life:viewLocation', function(location)
 	SetNewWaypoint(location[1],location[2])
 end)
 
+local route_blip_dive
+RegisterNetEvent('lc_fishing_life:startDive')
+AddEventHandler('lc_fishing_life:startDive', function(dive_data)
+	closeUI()
+	
+	dive_data.dive_location = json.decode(dive_data.dive_location)
+	local x,y,z = table.unpack(dive_data.dive_location)
+	route_blip_dive = Utils.Blips.createBlipForCoords(x,y,z,1,5,Utils.translate('contract_destination_blip'),10.0,true)
+
+	local timer
+	while DoesBlipExist(route_blip_dive) do
+		timer = 3000
+		local distance = #(GetEntityCoords(PlayerPedId()) - vector3(x,y,z))
+		if distance <= 20.0 then
+			timer = 2
+			Utils.Markers.drawMarker(21,x,y,z,0.5)
+			if distance <= 2.0 then
+				Utils.Markers.drawText3D(x,y,z-0.6,Utils.translate('dive_finish'))
+				if IsControlJustPressed(0,38) then
+					TriggerServerEvent("lc_fishing_life:finishDive")
+				end
+			end
+		end
+		Citizen.Wait(timer)
+	end
+end)
+
+RegisterNetEvent('lc_fishing_life:cancelDive')
+AddEventHandler('lc_fishing_life:cancelDive', function()
+	Utils.Blips.removeBlip(route_blip_dive)
+end)
+
+
 local vehicle,vehicle_blip
 local update_vehicle_status = 0
 RegisterNetEvent('lc_fishing_life:spawnVehicle')
@@ -213,7 +243,6 @@ AddEventHandler('lc_fishing_life:spawnVehicle', function(vehicle_data,garage_to_
 	end
 
 	vehicle_data.properties = json.decode(vehicle_data.properties)
-	Utils.Debug.printTable(vehicle_data)
 	if not vehicle_data.properties.plate then
 		vehicle_data.properties.plate = Utils.translate('vehicle_plate')..tostring(math.random(1000000, 9999999))
 	end
@@ -328,5 +357,18 @@ Citizen.CreateThread(function()
 		createMarkersThread()
 	else
 		createTargetsThread()
+	end
+end)
+
+Citizen.CreateThread(function()
+	Wait(1000)
+	SetNuiFocus(false,false)
+
+	Utils.loadLanguageFile(Lang)
+
+	if Utils.Config.custom_scripts_compatibility.target == "disabled" then
+		createMarkersPropertyThread()
+	else
+		createTargetsPropertyThread()
 	end
 end)
