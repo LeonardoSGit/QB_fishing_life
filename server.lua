@@ -261,15 +261,17 @@ Citizen.CreateThread(function()
 		local sql = "SELECT * FROM `fishing_life_properties`";
 		local query = Utils.Database.fetchAll(sql)
 		for k,v in pairs(query) do
-
-				local sql = " UPDATE `fishing_life_properties` SET property_condition = property_condition - 1 where user_id=@user_id and property = @property"
-				Utils.Database.execute(sql,{['@user_id'] = v.user_id, ['@property'] = v.property})
 				if v.property_condition < 1 then
 					local sql = "DELETE from `fishing_life_properties` where user_id=@user_id and property = @property "
 					Utils.Database.execute(sql, {['@user_id'] = v.user_id, ['@property'] = v.property});
 				elseif v.property_condition < 10 then
 					local source = Utils.Framework.getPlayerSource(v.user_id)
 					TriggerClientEvent("lc_fishing_life:Notify",source,"error",Utils.translate('will_lose_property'):format(v.property))
+					local sql = " UPDATE `fishing_life_properties` SET property_condition = property_condition - 1 where user_id=@user_id and property = @property"
+					Utils.Database.execute(sql,{['@user_id'] = v.user_id, ['@property'] = v.property})
+				else
+					local sql = " UPDATE `fishing_life_properties` SET property_condition = property_condition - 1 where user_id=@user_id and property = @property"
+					Utils.Database.execute(sql,{['@user_id'] = v.user_id, ['@property'] = v.property})
 				end
 		end
 		Wait(1000*60*Config.time_degradate_property)
