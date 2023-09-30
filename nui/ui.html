@@ -18,6 +18,7 @@
 		<link rel="stylesheet" href="css/style.css">
 		<link id="css-light" rel="stylesheet" href="css/light-style.css" disabled>
 		<link id="css-dark" rel="stylesheet" href="css/dark-style.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
 
 		<!-- Font Awesome 6 -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -70,8 +71,8 @@
 												<div class="card-body">
 													<div class="media d-flex">
 														<div class="media-body text-left">
-															<h3 id="profile-money-earned" class="text-success">$0.00</h3>
-															<span id="profile-money-earned-2">Total money earned</span>
+															<h3 id="profile-money-earned-text" class="text-success"></h3>
+															<span id="profile-money-earned2"></span>
 														</div>
 														<div class="align-self-center">
 															<i class="fas fa-money-check-alt text-success font-large-2 float-right"></i>
@@ -87,8 +88,8 @@
 												<div class="card-body">
 													<div class="media d-flex">
 														<div class="media-body text-left">
-															<h3 id="profile-money-spent" class="text-success">$0.00</h3>
-															<span id="profile-money-spent-2">Total money spent</span>
+															<h3 id="profile-money-spent-text" class="text-success"></h3>
+															<span id="profile-money-spent2"></span>
 														</div>
 														<div class="align-self-center">
 															<i class="fas fa-money-check text-success font-large-2 float-right"></i>
@@ -100,68 +101,34 @@
 									</div>
 								</div>
 								<div class="row mb-3">
-									<div class="col-3">
+									<div class="col-6">
 										<div class="card card-centering">
 											<div class="card-content">
 												<div class="card-body">
 													<div class="media d-flex">
 														<div class="media-body text-left">
-															<h3 id="profile-goods" class="blue">0</h3>
-															<span id="profile-goods-2">Goods bought</span>
+															<h3 id="profile-total-rare-fish" class="bronze"></h3>
+															<span id="profile-total-rare-fish-2"></span>
 														</div>
 														<div class="align-self-center">
-															<i class="fas fa-truck-loading blue font-large-2 float-right"></i>
+															<i class="fas fa-fish bronze font-large-2 float-right"></i>
 														</div>
 													</div>
 												</div>
 											</div>
 										</div>
 									</div>
-									<div class="col-3">
+									<div class="col-6">
 										<div class="card card-centering">
 											<div class="card-content">
 												<div class="card-body">
 													<div class="media d-flex">
 														<div class="media-body text-left">
-															<h3 id="profile-distance-traveled" class="blue">0km</h3>
-															<span id="profile-distance-traveled-2">Distance traveled</span>
+															<h3 id="profile-total-common-fish" class="blue"></h3>
+															<span id="profile-total-common-fish-2"></span>
 														</div>
 														<div class="align-self-center">
-															<i class="fas fa-route blue font-large-2 float-right"></i>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class="col-3">
-										<div class="card card-centering">
-											<div class="card-content">
-												<div class="card-body">
-													<div class="media d-flex">
-														<div class="media-body text-left">
-															<h3 id="profile-total-visits" class="text-danger">0</h3>
-															<span id="profile-total-visits-2">Total visits</span>
-														</div>
-														<div class="align-self-center">
-															<i class="fas fa-map-marker-alt text-danger font-large-2 float-right"></i>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class="col-3">
-										<div class="card card-centering">
-											<div class="card-content">
-												<div class="card-body">
-													<div class="media d-flex">
-														<div class="media-body text-left">
-															<h3 id="profile-customers" class="text-danger">0</h3>
-															<span id="profile-customers-2">Customers</span>
-														</div>
-														<div class="align-self-center">
-															<i class="fas fa-users text-danger font-large-2 float-right"></i>
+															<i class="fas fa-fish blue font-large-2 float-right"></i>
 														</div>
 													</div>
 												</div>
@@ -170,20 +137,36 @@
 									</div>
 								</div>
 								<div class="row mb-3">
-									<div class="col-12">
-										<div class="card overflow-hidden card-centering">
+									<div class="col-6">
+										<div class="card card-centering">
 											<div class="card-content">
-												<div class="card-body cleartfix">
+												<div class="card-body">
 													<div class="media d-flex">
 														<div class="media-body text-left">
-															<h3 id="profile-stock-1" class="amber accent-4">0.0% <small class="text-danger"><b>Staying with LOW STOCK will make you lose your business!</b></small></h3>
-															<span id="profile-stock-2">Stock Capacity (Max: 150)</span>
+															<h3 id="profile-total-dives" class="blue-grey.lighten-3 "></h3>
+															<span id="profile-total-dives-2"></span>
 														</div>
 														<div class="align-self-center">
-															<i class="fas fa-boxes amber accent-4 font-large-2 float-right"></i>
+															<i class="fas fa-swimmer blue-grey.lighten-3  font-large-2 float-right"></i>
 														</div>
 													</div>
-													<div id="profile-stock-3" class="progress mt-1 mb-0" style="height: 7px;"><div class="progress-bar bg-amber accent-4" role="progressbar" style="width: 0.0%" aria-valuenow="0.0" aria-valuemin="0" aria-valuemax="100"></div></div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card card-centering">
+											<div class="card-content">
+												<div class="card-body">
+													<div class="media d-flex">
+														<div class="media-body text-left">
+															<h3 id="profile-total-deliveries" class="blue-grey.lighten-3 "></h3>
+															<span id="profile-total-deliveries-2"></span>
+														</div>
+														<div class="align-self-center">
+															<i class="fas fa-truck blue-grey.lighten-3  font-large-2 float-right"></i>
+														</div>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -699,6 +682,50 @@
 					</div>
 				</div>
 			</div>
+		</div>
+		
+		<div id="fishingUI">
+
+			<div id="controls">
+			  <div id="mouse" >
+				<img id="mouse-pic" src="images/fishing/mouse_left.png"></img>
+				<div id="controls-text-mouse"></div>
+			  </div>
+			  </br>  
+			  <div id="esc" >
+				<img id="esc-pic" src="images/fishing/esc.png"></img>
+				<div id="controls-text-esc"></div>
+			  </div>
+		
+			  <p id="controls-text"></p>
+			</div>
+			<div id = "circle-container">
+			
+			
+			<div id="circle-outer">
+
+				<div id="bobber">
+				  <img id="bobber-decor"  style="filter: invert(100%);"  src="images/fishing/bobber.png"></img>
+				</div>
+		  
+				<div id="reeling">
+				  <div id="reeling-circle-border"></div>
+				  <img id="reelpng"  style="filter: invert(100%);"  src="images/fishing/reel.png"></img>
+				</div>
+			  <div id="hook">
+				<img id="bobber-decor" style="filter: invert(100%);" src="images/fishing/fish.png"></img>
+			  </div>
+
+			  <div id="wrapper">
+				<svg class="progress progressfish noselect" data-progress="100" x="0px" y="0px" viewBox="0 0 130 80" style="background-color:transparent">
+				  <path class="track" d="M5,40a35,35 0 1,0 70,0a35,35 0 1,0 -70,0" />
+				  <path class="fill" d="M5,40a35,35 0 1,0 70,0a35,35 0 1,0 -70,0" />
+				</svg>
+			  </div>
+			  <div id="text-progress"></div>
+			  <div id="circle-inner" style="width: 1%; height: 1%; border-radius: 50%;"></div>
+			</div>
+		  	</div>
 		</div>
 		<script src="panel.js" type="text/javascript"></script>
 	</body>

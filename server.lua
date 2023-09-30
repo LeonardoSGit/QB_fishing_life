@@ -69,6 +69,8 @@ Citizen.CreateThread(function()
 				`rod_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`bait_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`gimp_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`fishs_rare_caught` bigint(255) UNSIGNED NOT NULL DEFAULT '255',
+				`fishs_common_caught` bigint(255) UNSIGNED NOT NULL DEFAULT '255',
 				`money` INT(11) NOT NULL DEFAULT '0',
 				`exp` INT(11) NOT NULL DEFAULT '0',
 				`skill_points` INT(11) NOT NULL DEFAULT '0',
@@ -103,7 +105,7 @@ Citizen.CreateThread(function()
 				`user_id` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 				`property` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 				`properties` LONGTEXT NOT NULL COLLATE 'utf8_general_ci',
-				`stock` LONGTEXT NOT NULL COLLATE 'utf8_general_ci',
+				`stock` LONGTEXT NOT NULL COLLATE 'utf8_general_ci' DEFAULT '[]',
 				`property_condition`  INT(11) UNSIGNED NOT NULL DEFAULT '100',
 				PRIMARY KEY (`id`) USING BTREE,
 				INDEX `fishing_life_vehicle` (`user_id`, `property`) USING BTREE
@@ -366,6 +368,9 @@ AddEventHandler("lc_fishing_life:finishContract",function()
 				return
 			end
 		end
+		
+		local sql = "UPDATE `fishing_life_users` SET total_deliveries = total_deliveries + 1 WHERE user_id = @user_id";
+		Utils.Database.execute(sql, {['@user_id'] = user_id});
 
 		local sql = "DELETE FROM `fishing_available_contracts` WHERE id = @id";
 		Utils.Database.execute(sql, {['@id'] = started[source].id});
@@ -443,6 +448,8 @@ AddEventHandler("lc_fishing_life:finishDive",function()
 			end
 		end
 
+		local sql = "UPDATE `fishing_life_users` SET total_dives = total_dives + 1 WHERE user_id = @user_id";
+		Utils.Database.execute(sql, {['@user_id'] = user_id});
 		local sql = "DELETE FROM `fishing_available_dives` WHERE id = @id";
 		Utils.Database.execute(sql, {['@id'] = startedDive[source].id});
 		TriggerClientEvent("lc_fishing_life:cancelDive",source)
@@ -454,7 +461,6 @@ RegisterServerEvent("lc_fishing_life:cancelDive")
 AddEventHandler("lc_fishing_life:cancelDive",function()
 	local source = source
 	Wrapper(source,function(user_id)
-		Utils.Debug.printTable(startedDive)
 		if not startedDive[source] then
 			return
 		end
@@ -871,7 +877,6 @@ end)
 RegisterServerEvent("lc_fishing_life:depositItem")
 AddEventHandler("lc_fishing_life:depositItem",function(key,data)
 	local source = source
-	Utils.Debug.printTable(data)
 	Wrapper(source, function(user_id)
 		local sql = "SELECT stock FROM `fishing_life_properties` WHERE property = @property and user_id = @user_id";
 		local query =  Utils.Database.fetchAll(sql,{['@property'] = data.property, ['@user_id'] = user_id});
@@ -887,13 +892,14 @@ AddEventHandler("lc_fishing_life:depositItem",function(key,data)
 				end
 				if config_item then
 					if stock_amount + (data.amount * config_item.weight) <= max_stock then
-						Utils.Debug.printTable(data.item)
-						Utils.Debug.printTable(data.amount)
 						success = Utils.Framework.getPlayerItem(source,data.item,data.amount)
 						if success then
 							TriggerClientEvent("lc_fishing_life:Notify",source,"success",Lang[Config.lang]['stock_item_deposited'])
 						end
 						if success then
+							if not arr_stock then
+								arr_stock = {}
+							end
 							if not arr_stock[data.item] then arr_stock[data.item] = 0 end
 							arr_stock[data.item] = arr_stock[data.item] + data.amount
 							local sql = "UPDATE `fishing_life_properties` SET stock = @stock , property = @property , user_id = @user_id";
@@ -915,7 +921,7 @@ end)
 
 function giveFisherMoney(user_id,amount)
 	if amount > 0 then
-		local sql = "UPDATE `fishing_life_users` SET money = money + @amount WHERE user_id = @user_id";
+		local sql = "UPDATE `fishing_life_users` SET money = money + @amount, total_money_spent = total_money_spent + ".. amount .. " WHERE user_id = @user_id";
 		Utils.Database.execute(sql, {['@amount'] = amount, ['@user_id'] = user_id});
 	end
 end
@@ -924,7 +930,7 @@ function tryGetFisherMoney(user_id,amount)
 	local sql = "SELECT money FROM `fishing_life_users` WHERE user_id = @user_id";
 	local query = Utils.Database.fetchAll(sql,{['@user_id'] = user_id})[1];
 	if query and tonumber(query.money) >= amount then
-		local sql = "UPDATE `fishing_life_users` SET money = @amount WHERE user_id = @user_id";
+		local sql = "UPDATE `fishing_life_users` SET money = @amount, total_money_earned = total_money_earned + ".. amount .. " WHERE user_id = @user_id";
 		Utils.Database.execute(sql, {['@amount'] = (tonumber(query.money) - amount), ['@user_id'] = user_id});
 		return true
 	else
@@ -960,18 +966,21 @@ end
 
 function getStockWeight(arr_stock)
 	local weight = 0
-	for k,v in pairs(arr_stock) do
-		local item = nil
-		if string.find(k,'fish') then
-			item = Config.fishs_available[k]
+	if arr_stock then
+		for k,v in pairs(arr_stock) do
+			local item = nil
+			if string.find(k,'fish') then
+				item = Config.fishs_available[k]
+			end
+			if item then
+				weight = weight + item.weight * v
+			else
+				print("^8["..GetCurrentResourceName().."]^3 item ^1"..k.."^3 is in a property stock but it is not configured in config, please add it in the config.^7")
+			end
 		end
-		if item then
-			weight = weight + item.weight * v
-		else
-			print("^8["..GetCurrentResourceName().."]^3 item ^1"..k.."^3 is in a property stock but it is not configured in config, please add it in the config.^7")
-		end
+		return weight
 	end
-	return weight
+	return 0
 end
 
 function getMaxStock(property)
@@ -992,7 +1001,7 @@ end
 function getPlayerLevel(user_id)
 	local sql = "SELECT exp FROM `fishing_life_users` WHERE user_id = @user_id";
 	local query = Utils.Database.fetchAll(sql,{['@user_id'] = user_id})[1];
-	local level = 0
+	local level = 1
 	if query then
 		for k,v in pairs(Config.required_xp_to_levelup) do
 			if tonumber(query.exp) >= v then
@@ -1023,7 +1032,6 @@ function openUI(source,key,isUpdate)
 				return
 			end
 		end
-
 		--Busca todos os items disponiveis para compra de acordo com o level do usuario
 		query.available_vehicles = Utils.Table.deepCopy(Config.vehicles[query.fishing_life_users.vehicles_upgrade])
 		query.available_boats = Utils.Table.deepCopy(Config.vehicles[query.fishing_life_users.boats_upgrade])
@@ -1080,8 +1088,6 @@ function openUI(source,key,isUpdate)
 		query.config.lake = Utils.Table.deepCopy(Config.lake)
 		query.config.sea = Utils.Table.deepCopy(Config.sea)
 		query.config.swan = Utils.Table.deepCopy(Config.swan)
-		-- query.config.dealership = Utils.Table.deepCopy(Config.dealership)
-
 		-- Busca outras variaveis
 		query.config.max_loan = getMaxLoan(user_id)
 		query.config.player_level = getPlayerLevel(user_id)
@@ -1125,7 +1131,7 @@ function openPropertyUI(source,property_id,user_id)
 			end
 		end
 		property.stock =  json.decode(property.stock)
-		property.stock_amount = getStockAmount(property.stock)
+		property.stock_amount = property.stock and getStockAmount(property.stock) or 0
 		property.name = Config.available_items_store.property[property.property].name
 		-- Envia pro front-end
 		TriggerClientEvent("lc_fishing_life:openProperty",source, data, property)
@@ -1157,6 +1163,7 @@ function dec(data)
             return string.char(c)
     end))
 end
+
 
 Citizen.CreateThread(function()
 	Wait(1000)
@@ -1303,9 +1310,15 @@ function runCreateTableQueries()
 				`rod_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`bait_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				`gimp_upgrade` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
+				`fishs_rare_caught` bigint(255) UNSIGNED NOT NULL DEFAULT '0',
+				`fishs_common_caught` bigint(255) UNSIGNED NOT NULL DEFAULT '0',
 				`money` INT(11) NOT NULL DEFAULT '0',
 				`exp` INT(11) NOT NULL DEFAULT '0',
 				`skill_points` INT(11) NOT NULL DEFAULT '0',
+				`total_money_earned` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`total_money_spent` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`total_dives` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`total_deliveries` INT(10) UNSIGNED NOT NULL DEFAULT '0',
 				`dark_theme` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1',
 				PRIMARY KEY (`user_id`) USING BTREE
 			)
@@ -1348,3 +1361,69 @@ function runCreateTableQueries()
 		]])
 	end
 end
+
+--FISHING AREA 
+
+RegisterServerCallback("lc_fishing_life:getDataFishing", function(source,cb )
+	local source = source
+	Wrapper(source,function(user_id)
+		cb(getDataFishing(user_id))
+	end)
+end)
+
+
+RegisterServerEvent("lc_fishing_life:closeFishingUi")
+AddEventHandler("lc_fishing_life:closeFishingUi",function(key,data)
+	local source = source
+	Wrapper(source,function(user_id)
+		TriggerClientEvent("lc_fishing_life:closeFishingUi",source,data.success)
+	end)
+end)
+
+RegisterServerEvent("lc_fishing_life:receiveFish")
+AddEventHandler("lc_fishing_life:receiveFish",function(fish)
+	local source = source
+	local user_id = Utils.Framework.getPlayerId(source)
+	giveplayerXp(user_id, Config.exp_earned["fishing"][fish.type],source)
+	local sql = "UPDATE `fishing_life_users` SET fishs_"..fish.type.."_caught = fishs_"..fish.type.."_caught + 1 where user_id = @user_id";
+	Utils.Database.execute(sql, {['@user_id'] = user_id});
+	if Utils.Framework.givePlayerItem(source,fish.name,1) then
+		TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('just_caught_fish'):format(fish.name))
+	end
+end)
+
+function getDataFishing(user_id)
+	local sql = "SELECT * FROM `fishing_life_users` WHERE user_id = @user_id";
+	local player =  Utils.Database.fetchAll(sql,{['@user_id'] = user_id})[1];
+	if  player == nil then
+		local sql = "INSERT INTO `fishing_life_users` (user_id) VALUES (@user_id);";
+		Utils.Database.execute(sql, {['@user_id'] = user_id});
+		local sql = "SELECT * FROM `fishing_life_users` WHERE user_id = @user_id";
+		player =  Utils.Database.fetchAll(sql,{['@user_id'] = user_id})[1];
+	end
+	return player
+end
+
+function giveplayerXp(user_id, amount,source) 
+	local sql = "Select * from `fishing_life_users` where user_id = @user_id";
+	local user = Utils.Database.fetchAll(sql, { ['@user_id'] = user_id})[1];
+	local level = getPlayerLevel(user_id);
+	local newExp = user.exp + amount;
+
+	if newExp >= Config.required_xp_to_levelup[level] then
+		local sql = "UPDATE `fishing_life_users` SET skill_points = skill_points + 1 where user_id = @user_id ;";
+		Utils.Database.execute(sql, {['@user_id'] = user_id});
+		TriggerClientEvent("lc_fishing_life:Notify",source,"success",Utils.translate('new_level'):format(level + 1))
+	end
+	local sql = "UPDATE `fishing_life_users` SET exp = ".. newExp.." where user_id = @user_id ;";
+	Utils.Database.execute(sql, { ['@user_id'] = user_id});
+end
+
+
+
+
+
+
+
+
+

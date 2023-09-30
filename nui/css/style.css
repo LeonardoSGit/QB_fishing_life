@@ -454,5 +454,217 @@ body {
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+	background: transparent !important;
 	user-select: none;
+}
+
+
+/*=============================*/
+/*========= FISHING AREA =========*/
+/*=============================*/
+
+
+
+#container {
+  height: 100%;
+  width: 100%;
+}
+
+#controls {
+  color: white;
+  text-shadow: 0px 0px 10px black;
+  position: absolute;
+  background: rgba(0, 0, 0, 0);
+  height: 60px;
+  width: 120px;
+  top: 50%;
+  left: 50%;
+  transform: translate(150%, 50%);
+  z-index: 100;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#mouse {
+  position: absolute;
+  background: transparent;
+  white-space: nowrap;
+}
+#esc {
+  position: absolute;
+  top: 90%;
+  left: -1.5%;
+  background: transparent;
+  white-space: nowrap;
+}
+#mouse-pic {
+  height: 30px;
+  width: 20px;
+  background: transparent;
+  position: absolute;
+  white-space: nowrap;
+  border-radius: 20px;
+  box-shadow: 0px 0px 30px 2px rgba(0, 0, 0, 0.9);
+}
+
+#esc-pic {
+  height: 25px;
+  width: 25px;
+  background: transparent;
+  position: absolute;
+  white-space: nowrap;
+  box-shadow: 0px 0px 30px 2px rgba(0, 0, 0, 0.9);
+}
+
+#controls-text-mouse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(50%, 40%);
+}
+
+#controls-text-esc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(50%, 25%);
+}
+
+#circle-container {
+  background: transparent;
+  height: 200px;
+  width: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#circle-outer {
+  height: 80px;
+  width: 80px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#reeling {
+  height: 80px;
+  width: 80px;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#bobber {
+  height: 80px;
+  width: 80px;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#reeling-circle-border {
+  height: 100px;
+  width: 100px;
+  border-radius: 50%;
+  background: transparent;
+  position: absolute;
+  box-shadow: 0 0 0 2px white;
+}
+
+#circle-inner {
+  width: 50%;
+  height: 1%;
+  position: absolute;
+  background-color: rgba(0, 157, 134, 1);
+  user-select: none;
+  outline: none;
+  z-index: 100;
+}
+
+#bobber-decor {
+  height: 40px;
+  width: 40px;
+}
+
+#reelpng {
+  height: 82px;
+  width: 80px;
+
+}
+
+#text-progress {
+  color: white;
+  position: absolute;
+  transform: translate(0%, -445%);
+  text-shadow: rgba(0, 0, 0, 1) 1px 0 10px;
+  text-align: center;
+  user-select: none;
+  outline: none;
+  white-space: nowrap;
+}
+
+#wrapper {
+  top: 50%;
+  left: 50%;
+  transform: translate(-30.8%, -49.9%);
+  user-select: none;
+  outline: none;
+  position: absolute;
+}
+.progressfish {
+  width: 190px;
+  height: 280px;
+  outline: none;
+  stroke: white;
+}
+.progressfish .track,
+.progressfish .fill {
+  fill: rgba(0, 0, 0, 0);
+  stroke-width: 4;
+  transform: rotate(90deg) translate(0px, -80px);
+  outline: none;
+}
+.progressfish .track {
+  stroke: transparent;
+  outline: none;
+}
+.progressfish .fill {
+  stroke-dasharray: 219.99078369140625;
+  stroke-dashoffset: -219.99078369140625;
+  outline: none;
+}
+.progressfish .value,
+.progressfish .text {
+  font-family: "Open Sans";
+  fill: rgb(255, 255, 255);
+  text-anchor: middle;
+  outline: none;
+}
+.progressfish .text {
+  font-size: 12px;
+  outline: none;
+}
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: default;
 }

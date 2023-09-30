@@ -74,6 +74,7 @@ Lang['en'] = {
 	['cant_carry_item'] = "You cant carry that item",
 
 	['will_lose_property'] = "You will lose the property %s really soon if you dont repair it",
+	['new_level'] = "You just went to level: %s !",
 
 	['logs_date'] = "Date",
 	['logs_hour'] = "Time",
@@ -81,4 +82,20 @@ Lang['en'] = {
 	['logs_deposit'] = "```prolog\n[MONEY DEPOSITED]: %s \n[ID] %s \r```",
 	['logs_buy_vehicle'] = "```prolog\n[USER]: %s\n[VEHICLE PURCHASED]: %s \n[PRICE]: %s \n[ID]: %s \r```",
 	['logs_buy_property'] = "```prolog\n[USER]: %s\n[PROPERTY PURCHASED]: %s \n[PRICE]: %s \n[ID]: %s \r```",
+
+
+	--FISHING AREA
+	['just_caught_fish'] = "Just caught the fish: %s",
+	['fish_doesnt_exist'] = "The fish: $%s does not exist, please contact your admin about this.",
+	["cant_now"] = "You cant do that now",
+	["aim_to_water"] = "Please, ain to the water!",
+	["cant_fish"] = "Can't fish here",
+	["got_away"] = "The fish got away",
+	['caught_nothing'] = "Caught nothing",
+	["hook"] = "CATCH!",
+	["success"] = "SUCCESS",
+	["got_away2"] = "GOT AWAY",
+	["fail"] = "FAIL",
+	["fish_bite"] = "A FISH BITE!",
+	["too_soon"] = "TOO EARLY!",
 }

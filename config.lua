@@ -17,7 +17,7 @@ Config.job = "false"							-- Required job name to open the menu (set as false t
 -- You can add as many locations as you like, just use the location already created as an example
 Config.fishing_locations = {
 	["fishing_1"] = {		
-		['menu_location'] = {848.32, -899.26, 25.25},	-- Coordinate to open the menu (vector3)
+		['menu_location'] = {3436.87, 5169.23, 7.38},	-- Coordinate to open the menu (vector3)
 		['garage_locations'] = {						-- Garage coordinates, where the business vehicles will spawn (vector4)
 			{856.32, -895.12, 25.41}--{854.29, -899.33, 25.35, 269.83},
 			--{854.43, -905.59, 25.35, 273.32},
@@ -137,14 +137,16 @@ Config.available_dives = {
 }
 
 Config.vehicle_sell_price_multiplier = 0.7		-- Value you receive when selling the used item
+
+-- Available items to buy in the main interface
 Config.available_items_store = {
-	['vehicle'] = {
-		['weevil'] = {
-			['name'] = 'Rubble',
-			['description'] = 'A truck to carry out all your fishes',
+	['vehicle'] = { -- Type of the item, can be vehicle, boat or property
+		['weevil'] = { 
+			['name'] = 'Rubble', -- Name of the vehicle
+			['description'] = 'A truck to carry out all your fishes', -- Description
 			['price'] = 3100,
 			['image'] = 'images/vehicles/rubble.png',
-			['repair_price'] = 400,
+			['repair_price'] = 400, 
 			['refuel_price'] = 10,
 		},
 	},
@@ -164,17 +166,22 @@ Config.available_items_store = {
 			['price'] = 3100,
 			['warehouse_capacity'] = 100,
 			['image'] = 'images/vehicles/rubble.png',
-			['location'] = {854.28, -898.53, 25.35},
+			['location'] = {3429.36, 5166.86, 7.38},
 			['repair_price'] = 1.0,
 		},
 	}
 }
 
-Config.time_degradate_property = 1
+Config.time_degradate_property = 10000000000000000
 
+-- Upgrades the user can get
 Config.upgrades = {
-    ['boats'] = {
-        { points_required = 1, level_reward = 10, icon = 'images/fuel.png' },
+    ['boats'] = { -- Upgrades on how many boats can have and which boats
+        { 
+			points_required = 1, -- Points required that the user earn on evolving
+			level_reward = 10, -- How many more boats he will be able to buy
+			icon = 'images/fuel.png' -- Image of the upgrades
+		},
         { points_required = 1, level_reward = 20, icon = 'images/fuel.png' },
         { points_required = 1, level_reward = 30, icon = 'images/fuel.png' },
         { points_required = 1, level_reward = 40, icon = 'images/fuel.png' },
@@ -210,48 +217,49 @@ Config.upgrades = {
     },
 }
 
+-- Upgrades to make fishing easier
 Config.equipments_upgrades = {
-    ['windlass'] = { --pescar mais facil
-        { price = 1, level_reward = 1, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 3, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 4, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 6, icon = 'images/fuel.png' },
+    ['windlass'] = { -- The time the user will be able to hook the fish. If he is more level, he will have to wait less, the level_reward is the percentage of the full speed it will be able to hook the fish
+        { price = 1, level_reward = 0, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 20, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 40, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 60, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 80, icon = 'images/fuel.png' },
     },
-    ['rod'] = { -- pegar mais peixes raros
-        { price = 1, level_reward = 3, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 4, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 6, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 8, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 12, icon = 'images/fuel.png' },
+    ['rod'] = { -- The chance to get more rare fishs
+        { price = 3, icon = 'images/fuel.png' },
+        { price = 1, icon = 'images/fuel.png' },
+        { price = 1, icon = 'images/fuel.png' },
+        { price = 1, icon = 'images/fuel.png' },
+        { price = 1, icon = 'images/fuel.png' },
     },
-    ['bait'] = { -- pescar mais rpaido
-        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 4, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 6, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 8, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 12, icon = 'images/fuel.png' },
+    ['bait'] = { -- Easier to fish, the user has more time to react to fish time.
+        { price = 1, level_reward = 200, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 160, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 120, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 80, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 40, icon = 'images/fuel.png' },
     },
-    ['gimp'] = { -- durabilidade
-        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
-        { price = 1, level_reward = 2, icon = 'images/fuel.png' },
+    ['gimp'] = { -- How hard it will be the reeling of the fish
+        { price = 1, level_reward = 100, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 70, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 35, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 10, icon = 'images/fuel.png' },
+        { price = 1, level_reward = 0, icon = 'images/fuel.png' },
     },
 }
 
-
+-- fishs available to fish 
 Config.fishs_available = {
-	['tuna_fish' ] = {
-		[ 'item' ] = 'tuna_fish',
-		[ 'img' ] = 'images/fuel.png',
-		[ 'name' ] = 'Tuna',
+	['bluefish' ] = { --name of the fish has to be the same the table in fishing_config
+		[ 'item' ] = 'blue_fish', -- The item that will appear to the user whe he is able to get the fish
+		[ 'img' ] = 'images/fuel.png', -- The image that will appear for the fish
+		[ 'name' ] = 'Blue Fish',
 		[ 'weight' ] = '1',
 		[ 'sale_value' ] = '1',
-		[ 'place' ] = 'swan',
+		[ 'place' ] = 'swan', -- The place the fish will appear
 	},
-	['salmon_fish'] = {
+	['salmonfish'] = {
 		[ 'item' ] = 'salmon_fish',
 		[ 'img' ] = 'images/fuel.png',
 		[ 'name' ] = 'Salmon',
@@ -261,28 +269,52 @@ Config.fishs_available = {
 	}
 }
 
+-- Which vehicles the user will have access in each level of upgrade
+-- Just get the key from the others tables and write as a phrase, like "fish1,fis2,fish3"
 Config.vehicles = {
-	[ 1 ] = { 'weevil' }
+	[ 1 ] = { 'weevil' },
+	[ 2 ] = { 'weevil' },
+	[ 3 ] = { 'weevil' },
+	[ 4 ] = { 'weevil' },
+	[ 5 ] = { 'weevil' }
 }
 
+-- Which boats the user will have access in each level of upgrade
+-- Just get the key from the others tables and write as a phrase, like "fish1,fis2,fish3"
 Config.boats = {
-	[ 1 ] = { 'weevil' }
+	[ 1 ] = { 'weevil' },
+	[ 2 ] = { 'weevil' },
+	[ 3 ] = { 'weevil' },
+	[ 4 ] = { 'weevil' },
+	[ 5 ] = { 'weevil' }
 }
 
+-- Which properties the user will have access in each level of upgrade
+-- Just get the key from the others tables and write as a phrase, like "fish1,fis2,fish3"
 Config.properties = {
-	[ 1 ] = { 'weevil' }
+	[ 1 ] = { 'weevil' },
+	[ 2 ] = { 'weevil' },
+	[ 3 ] = { 'weevil' },
+	[ 4 ] = { 'weevil' },
+	[ 5 ] = { 'weevil' }
 }
 
+-- Which fishs the user will have access on the swan in each level of upgrade
+-- Just get the key from the others tables and write as a phrase, like "fish1,fis2,fish3"
 Config.swan = {
-	[ 1 ] = { 'tuna_fish' }
+	[ 1 ] = { 'bluefish' }
 }
 
+-- Which fishs the user on the sea will have access in each level of upgrade
+-- Just get the key from the others tables and write as a phrase, like "fish1,fis2,fish3"
 Config.sea = {
-	[ 1 ] = { 'salmon_fish' }
+	[ 1 ] = { 'salmonfish' }
 }
 
+-- Which fishs the user on the lake will have access in each level of upgrade
+-- Just get the key from the others tables and write as a phrase, like "fish1,fis2,fish3"
 Config.lake = {
-	[ 1 ] = { 'tuna_fish' }
+	[ 1 ] = { 'bluefish' }
 }
 
 Config.vehicle_blips = {						-- Configure here the vehicle blips created in the script
@@ -330,6 +362,14 @@ Config.required_xp_to_levelup = {
 	[28] = 60000,
 	[29] = 65000,
 	[30] = 100000 -- Max
+}
+
+-- How much xp the user earn for each type of fish he fishes
+Config.exp_earned={
+	[ "fishing" ] = {
+		["rare"] = 500,
+		["common"] = 1000
+	}
 }
 
 --[[

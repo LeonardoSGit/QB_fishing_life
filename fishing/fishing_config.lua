@@ -1,125 +1,193 @@
 Fishing_Config = {}
-Fishing_Config.Core = exports['qb-core']:GetCoreObject() --can change the 'qb-core' here if you changed the script name else leave it alone
----Select ONE of the 3 methods below for interacting with the AI
-Fishing_Config.UseTarget = true --if you want to use qb-target to interact with the AI
-Fishing_Config.useDrawText = false --if you want to use draw text to interact with the AI
-Fishing_Config.UseQBMenu = false --if you want to use ab-menu to interact with the AI
+Fishing_Config.Core = exports['qb-core']:GetCoreObject() 
 
-Fishing_Config.qbtargetScriptName = "qb-target" --new script name here if you changed qb-target name else leave it alone
-
-Fishing_Config.debug = false --you can ignore this. just a tool for me to help out people who have issues
-
--- variables for all the text in the script. translate to whatever you like
-Fishing_Config.locale = {
-
-  --lua
-  ["cant_now"] = "You cant do that now",
-  ["aim_to_water"] = "Aim toward the water!",
-  ["cant_fish"] = "Can't fish here",
-  ["got_away"] = "The fish got away",
-  ["money_add"] = "you recieved $", --this will have the amount stringed to it. "you recieved $1000"
-  ["nothing_sell"] = "Nothing To Sell",
-  ['draw_text_sell'] = "[E] Sell Fish", --only used if you have useDrawText = true
-  ["cutting_bait"] = "Cutting Bait...",
-  ["cancel_bait"] = "Cutting Bait Has Been Canceled!",
-  ['set_bait'] = "Setting New Bait",
-
-  --js
-  ["hook"] = "HOOK!",
-  ["success"] = "SUCCESS",
-  ["got_away2"] = "GOT AWAY",
-  ["fail"] = "FAIL",
-  ["fish_on"] = "FISH ON!",
-  ["too_soon"] = "TOO EARLY!",
-
-  --qb-target ignore if not using qb-target
-  ['sell_fish_legal'] = "Sell Fish",
-  ['sell_fish_illegal'] = "Sell illegal Fish"
-}
-
-Fishing_Config.difficulty = {
-    ['easy'] = {                                 --*I would probably not touch these, or save the original values if you do*
-        tensionIncrease =  {min = 35, max = 40}, --speed of tension increase. lower = harder
-        tensionDecrease =  {min = 50, max = 55}, --speed of tension decrease. lower = easier
-        progressIncrease = {min = 1,  max = 8},  --speed of percent increase. lower = easier
-        progressDecrease = {min = 50, max = 55}, --speed of percent decrease. lower = harder
-    },
-    ['medium'] = {
-        tensionIncrease =  {min = 30, max = 35},
-        tensionDecrease =  {min = 55, max = 60},
-        progressIncrease = {min = 5,  max = 13},
-        progressDecrease = {min = 45, max = 50},
-    },
-    ['hard'] = {
-        tensionIncrease =  {min = 25, max = 30},
-        tensionDecrease =  {min = 60, max = 65},
-        progressIncrease = {min = 8,  max = 17},
-        progressDecrease = {min = 40, max = 45},
-    },
-}
-
-Fishing_Config.BaitTypes = { --list your bait types here. it is possible to create your own bait types if you want, you just need to go and create the item for it as well. these should be the item spawn name of the bait.
-    "none",
-    "legalbait",
-    "illegalbait"
-}
-
-Fishing_Config.IllegalBaitTypes = { --put whatever bait types you have that are considered illegal here. when someone uses one of these bait types it will have a chance of calling the police
-    ["illegalbait"] = true,
-}
-
-Fishing_Config.PoliceNotifChance = 10 --% chance out of 100 to call police when using illegal bait
-
-RegisterNetEvent("NW_Fishing:AlertPolice", function()
-    --add police notification here for illegal fishing if you want
-end)
-
-Fishing_Config.ValidBaitTypesForZone = { --this will set which baits can be used in which zones. make sure if you set a bait type to true here you make a loot table for that bait type in the correct zone in the Config.FishTable Below               
-    ['alamo'] = {                --always include ["none"] = true for all zones.
-        ["none"] = true, 
-        ["legalbait"] = true,
-        ["illegalbait"] = false
-    },
-    ['ocean'] = { 
-        ["none"] = true, 
-        ["legalbait"] = true, 
-        ["illegalbait"] = true
-    },
-    ['river'] = { 
-        ["none"] = true, 
-        ["legalbait"] = true,
-        ["illegalbait"] = false
-    },
-}
-
+-- Here are the areas that the user can fish and the every fish that the user can fish in each area
+-- You can add any fishes in the areas pre specified, just following the examples.
+-- Each of the area has the fish that can appear and be fished according to the level of the users. the level are between 1 and 5
 Fishing_Config.FishTable = {
-    ['sea'] = {
-        [1] = {["name"] = "swordfish",      ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",     ["chance"] = 5,     ["trash"] = false},
-        [2] = {["name"] = "tunafish",       ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",     ["chance"] = 5,     ["trash"] = false},
-        [3] = {["name"] = "mahifish",       ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",     ["chance"] = 5,     ["trash"] = false},
-        [4] = {["name"] = "halibut",        ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",   ["chance"] = 7,     ["trash"] = false},
-        [5] = {["name"] = "redfish",        ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",   ["chance"] = 7,     ["trash"] = false},
-        [6] = {["name"] = "bluefish",       ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",   ["chance"] = 7,     ["trash"] = false},
-        [7] = {["name"] = "seaturtle",      ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "hard",     ["chance"] = 2,     ["trash"] = false},
-    },
+    ['sea'] = { -- area to fish
+        [1] = { -- Fishs to appear in the level one of this area
+            [1] = {
+              ["name"] = "swordfish", -- name of the fish that has to have the word fish
+              ["prop"] = "a_c_fish", --what will appear in the inventory
+              ["ped"] = true, 
+              ["type"] = "common" --Amount of xp it will earn and chance to fish
+            },
+            [2] = {
+              ["name"] = "tunafish",
+              ["prop"] = "a_c_fish",
+              ["ped"] = true,
+              ["type"] = "common"
+            },
+        },
+        [2] = {
+          [1] = {
+            ["name"] = "mahifish",
+            ["prop"] = "a_c_fish",
+            ["ped"] = true,
+            ["type"] = "common"
+          },
+        },
+        [3] ={
+          [1] = {
+            ["name"] = "halibut",
+            ["prop"] = "a_c_fish",
+            ["ped"] = true,
+            ["type"] = "common"},
+        },
+        [4] = {
+          [1] = {
+            ["name"] = "redfish",
+            ["prop"] = "a_c_fish",
+            ["ped"] = true,
+            ["type"] = "rare"
+          },
+        },
+        [5] = {
+          [1] = {
+            ["name"] = "bluefish",
+            ["prop"] = "a_c_fish",
+            ["ped"] = true,
+            ["type"] = "rare"
+          },
+          [2] = {
+            ["name"] = "seaturtlefish",
+            ["prop"] = "a_c_fish",
+            ["ped"] = true,
+            ["type"] = "rare"
+          },
+        }    
+      },
     ['lake'] = {
-        [1] = {["name"] = "salmon",         ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",       ["chance"] = 2,     ["trash"] = false},
-        [2] = {["name"] = "perch",          ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",       ["chance"] = 2,     ["trash"] = false},
-        [3] = {["name"] = "bass",           ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",       ["chance"] = 2,     ["trash"] = false},
-        [4] = {["name"] = "tilapia",        ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
-        [5] = {["name"] = "catfish",        ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
-        [6] = {["name"] = "shad",           ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
-        [7] = {["name"] = "rainbowfish",    ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
+      [1] = {
+        [1] = {
+          ["name"] = "salmon",
+          ["prop"] = "a_c_fish",
+          ["ped"] = true,
+          ["type"] = "common"
+        },
+      },
+      [2] = {
+        [1] = {
+          ["name"] = "perch",
+          ["prop"] = "a_c_fish",
+          ["ped"] = true,
+          ["type"] = "common"
+        },
+        [2] = {
+          ["name"] = "bass",
+          ["prop"] = "a_c_fish",
+          ["ped"] = true,
+          ["type"] = "common"
+        },
+      },      
+      [3] = {
+        [1] = {
+          ["name"] = "tilapia",
+          ["prop"] = "a_c_fish",
+          ["ped"] = true,
+          ["type"] = "common"
+        },
+      },
+      [4] = {
+        [1] = {
+          ["name"] = "catfish",
+          ["prop"] = "a_c_fish",
+          ["ped"] = true,
+          ["type"] = "rare"
+        },
+      },
+      [5] = {
+        [1] = {
+          ["name"] = "shad",
+          ["prop"] = "a_c_fish",
+          ["ped"] = true,
+          ["type"] = "rare"
+        },
+        [2] = {
+          ["name"] = "rainbowfish",
+          ["prop"] = "a_c_fish",
+          ["ped"] = true,
+          ["type"] = "rare"
+        }
+      },
   },
   ['swan'] = {
-      [1] = {["name"] = "salmon",         ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",       ["chance"] = 2,     ["trash"] = false},
-      [2] = {["name"] = "perch",          ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",       ["chance"] = 2,     ["trash"] = false},
-      [3] = {["name"] = "bass",           ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "easy",       ["chance"] = 2,     ["trash"] = false},
-      [4] = {["name"] = "tilapia",        ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
-      [5] = {["name"] = "catfish",        ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
-      [6] = {["name"] = "shad",           ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
-      [7] = {["name"] = "rainbowfish",    ["prop"] = "a_c_fish",                      ["ped"] = true, ["diff"] = "medium",     ["chance"] = 5,     ["trash"] = false},
+    [1] = {
+      [1] = {
+        ["name"] = "salmon",
+        ["prop"] = "a_c_fish",
+        ["ped"] = true,
+        ["type"] = "common"
+      },
     },
+    [2] = {
+      [1] = {
+        ["name"] = "perch",
+        ["prop"] = "a_c_fish",
+        ["ped"] = true,
+        ["type"] = "common"
+      },
+    },
+    [3] = {
+      [1] = {
+        ["name"] = "bass",
+        ["prop"] = "a_c_fish",
+        ["ped"] = true,
+        ["type"] = "common"
+      },
+      [2] = {
+        ["name"] = "tilapia",
+        ["prop"] = "a_c_fish",
+        ["ped"] = true,
+        ["type"] = "common"
+      },
+    },
+    [4] = {
+      [1] = {
+        ["name"] = "catfish",
+        ["prop"] = "a_c_fish",
+        ["ped"] = true,
+        ["type"] = "rare"
+      },
+      [2] = {
+        ["name"] = "shad",
+        ["prop"] = "a_c_fish",
+        ["ped"] = true,
+        ["type"] = "rare"
+      },
+    },
+    [5] = {
+      [1] = {
+        ["name"] = "rainbowfish",
+        ["prop"] = "a_c_fish",
+        ["ped"] = true,
+        ["type"] = "rare"
+      },
+    },
+  },
+}
+
+-- Dificulty on when the user is reeling, very difficult to change if you dont know the process.
+Config.difficulty = {
+  ['easy'] = {                                 
+      tensionIncrease =  {min = 35, max = 40}, --speed of tension increase. lower = harder
+      tensionDecrease =  {min = 50, max = 55}, --speed of tension decrease. lower = easier
+      progressIncrease = {min = 1,  max = 8},  --speed of percent increase. lower = easier
+      progressDecrease = {min = 50, max = 55}, --speed of percent decrease. lower = harder
+  },
+  ['medium'] = {
+      tensionIncrease =  {min = 30, max = 35},
+      tensionDecrease =  {min = 55, max = 60},
+      progressIncrease = {min = 5,  max = 13},
+      progressDecrease = {min = 45, max = 50},
+  },
+  ['hard'] = {
+      tensionIncrease =  {min = 25, max = 30},
+      tensionDecrease =  {min = 60, max = 65},
+      progressIncrease = {min = 8,  max = 17},
+      progressDecrease = {min = 40, max = 45},
+  },
 }
 
 --polyzones for all the fishing spaces. dont touch unless you know what you are doing
@@ -130,20 +198,17 @@ local insidePier3 = false
 local insidePier4 = false
 local insidePier5 = false
 local insidePier6 = false
-local insidePier7 = false
 local insideFish1 = false
 local insideFish2 = false
-local insideFish3 = false
 local insideArea1 = false
 local insideArea8 = false
 local insidePls   = false
-local insideAlamo = false
-local insideriver1 = false
-local insideriver2 = false
-local insideriver3 = false
+local insideLake = false
+local insideSwan1 = false
+local insideSwan2 = false
+local insideSwan3 = false
 
---Name: river1 | Tue May 31 2022
-local river1 = PolyZone:Create({
+local swan1 = PolyZone:Create({
   vector2(-2046.97, 2759.09),
   vector2(-1301.52, 2928.79),
   vector2(-768.18, 3080.30),
@@ -160,13 +225,10 @@ local river1 = PolyZone:Create({
   vector2(-2777.27, 2374.24),
   vector2(-2680.30, 2868.18)
  }, {
-  name="river1",
-  --minZ=0,
-  --maxZ=800
+  name="swan1",
  })
 
---Name: river2 | Tue May 31 2022
-local river2 = PolyZone:Create({
+local swan2 = PolyZone:Create({
   vector2(-1577.27, 1553.03),
   vector2(-1546.97, 1753.03),
   vector2(-1525.76, 1877.27),
@@ -180,12 +242,10 @@ local river2 = PolyZone:Create({
   vector2(-1400.76, 1746.97),
   vector2(-1407.58, 1601.52)
  }, {
-  name="river2",
-  --minZ=0,
-  --maxZ=800
+  name="swan2",
  })
---Name: river3 | Tue May 31 2022
-local river3 = PolyZone:Create({
+
+local swan3 = PolyZone:Create({
   vector2(-195.45, 4216.67),
   vector2(-110.61, 4307.58),
   vector2(-328.79, 4553.03),
@@ -197,12 +257,10 @@ local river3 = PolyZone:Create({
   vector2(-1634.85, 4325.76),
   vector2(-1513.64, 4219.70)
  }, {
-  name="river3",
-  --minZ=0,
-  --maxZ=800
+  name="swan3",
  })
 
---Name: pier1 | 2021-01-12T23:45:17Z
+
 local pier1 = PolyZone:Create({
     vector2(-3428.3308105469, 951.81042480469),
     vector2(-3428.3774414063, 983.30786132813),
@@ -214,12 +272,8 @@ local pier1 = PolyZone:Create({
     vector2(-3408.8547363281, 951.81213378906)
   }, {
     name="pier1",
-    --debugPoly=true,
-    --minZ = 8.2915201187134,
-    --maxZ = 8.3466939926147
   })
   
---Name: Pier2 | 2021-01-13T00:03:02Z
 local pier2 = PolyZone:Create({
   vector2(3867.8747558594, 4465.3662109375),
   vector2(3867.8332519531, 4462.0268554688),
@@ -231,12 +285,8 @@ local pier2 = PolyZone:Create({
   vector2(3839.9389648438, 4465.3891601563)
 }, {
   name="Pier2",
-  --debugPoly=true,
-  --minZ = 1.8629994392395,
-  --maxZ = 2.7439646720886
 })
 
---Name: Pier3 | 2021-01-13T00:12:00Z
 local pier3 = PolyZone:Create({
     vector2(3440.8439941406, 5175.9111328125),
     vector2(3447.1306152344, 5167.0336914063),
@@ -251,13 +301,9 @@ local pier3 = PolyZone:Create({
     vector2(3437.4489746094, 5182.986328125)
   }, {
     name="Pier3",
-    --debugPoly=true,
-    --minZ = 2.6028101444244,
-    --maxZ = 8.0002679824829
   })
   
 
-  --Name: Pier5 | 2021-01-13T00:30:16Z
 local pier5 = PolyZone:Create({
     vector2(-1735.5949707031, -1123.0395507813),
     vector2(-1791.8107910156, -1190.1579589844),
@@ -273,12 +319,8 @@ local pier5 = PolyZone:Create({
     vector2(-1749.3967285156, -1111.7651367188)
   }, {
     name="Pier5",
-    --debugPoly=true,
-    --minZ = 8.8172740936279,
-    --maxZ = 13.317274093628
   })
 
-  --Name: Pier6 | 2021-01-13T00:35:07Z
 local pier6 = PolyZone:Create({
     vector2(-1615.7585449219, 5261.12109375),
     vector2(-1607.4755859375, 5265.162109375),
@@ -288,9 +330,6 @@ local pier6 = PolyZone:Create({
     vector2(-1592.9252929688, 5211.2744140625)
   }, {
     name="Pier6",
-    --debugPoly=true,
-    --minZ = 1.7037554979324,
-    --maxZ = 4.8037557601929
   })
   
 local fish1 = PolyZone:Create({
@@ -301,11 +340,8 @@ local fish1 = PolyZone:Create({
     vector2(-3558.0751953125, 1921.9122314453)
   }, {
     name="Fish1",
-    --debugPoly=true,
-    --minZ = 8.3466796875,
-    --maxZ = 8.3466796875
   })
---Name: fish2 | 2021-01-19T05:06:40Z
+
 local fish2 = PolyZone:Create({
     vector2(-1123.4390869141, 7245.9287109375),
     vector2(-530.41833496094, 7057.4970703125),
@@ -313,11 +349,8 @@ local fish2 = PolyZone:Create({
     vector2(-1977.0452880859, 6724.8681640625)
   }, {
     name="Fish2",
-    --debugPoly=true,
-    --minZ = 9.9427719116211,
-    --maxZ = 9.9427719116211
   })
---Name: fish3 | 2021-01-19T05:12:25Z
+
 local fish3 = PolyZone:Create({
     vector2(4514.0, 5360.8212890625),
     vector2(5059.1123046875, 4454.6508789063),
@@ -329,10 +362,8 @@ local fish3 = PolyZone:Create({
     vector2(4670.7153320313, 5577.056640625)
   }, {
     name="Fish3",
-    --debugPoly=true,
-    --minZ = 34.265563964844,
-    --maxZ = 34.265563964844
   })
+
 local area8 = PolyZone:Create({
     vector2(-1786.36, -973.48),
     vector2(-1823.86, -867.42),
@@ -377,13 +408,8 @@ local area8 = PolyZone:Create({
     vector2(-3907.58, -2028.79)
    }, {
     name="8",
-    --debugPoly=true,
-    --minZ=0,
-    --maxZ=800
    })
 
-    
---Name: 1 | Wed May 05 2021
 local area1 = PolyZone:Create({
     vector2(1577.65, 6658.33),
     vector2(1584.47, 6668.56),
@@ -718,12 +744,8 @@ local area1 = PolyZone:Create({
     vector2(1571.21, 8277.27)
    }, {
     name="1",
-    --debugPoly=true,
-    --minZ=0,
-    --maxZ=800
    })
 
---Name: pls | Wed May 19 2021
 local pls = PolyZone:Create({
     vector2(-3308.33, 967.80),
     vector2(-3241.67, 1327.65),
@@ -843,12 +865,8 @@ local pls = PolyZone:Create({
     vector2(-3400.00, 967.05)
    }, {
     name="pls",
-    --debugPoly=true,
-    --minZ=0,
-    --maxZ=800
     })
 
---Name: alamo | Wed May 19 2021
 local alamo = PolyZone:Create({
     vector2(126.47, 3426.16),
     vector2(170.03, 3410.63),
@@ -926,9 +944,6 @@ local alamo = PolyZone:Create({
     vector2(120.39, 3438.29)
    }, {
     name="Alamo",
-    --debugPoly=true,
-    --minZ=0,
-    --maxZ=800
    })
 
 local area10 = PolyZone:Create({
@@ -1001,9 +1016,6 @@ local area10 = PolyZone:Create({
  vector2(974.42, -2801.44)
 }, {
  name="area10",
- --debugPoly = true,
- --minZ=0,
- --maxZ=800
 })
 
 local area15 = PolyZone:Create({
@@ -1017,16 +1029,12 @@ local area15 = PolyZone:Create({
  vector2(-2301.52, -2277.27)
 }, {
  name="area15",
- --debugPoly = true,
- --minZ=0,
- --maxZ=800
 })
 local area = false
 
 function fishingSpot()
     area = false
     local plyPos = GetEntityCoords(PlayerPedId())
-
     insidePier1 = pier1:isPointInside(plyPos)
     insidePier2 = pier2:isPointInside(plyPos)
     insidePier3 = pier3:isPointInside(plyPos)
@@ -1039,13 +1047,40 @@ function fishingSpot()
     insideArea10 = area10:isPointInside(plyPos)
     insideArea15 = area15:isPointInside(plyPos)
     insidePls = pls:isPointInside(plyPos)
-    insideAlamo = alamo:isPointInside(plyPos)
-    if insideriver1 or insideriver2 or insideriver3 then
-        area = 'river'
-    elseif insideAlamo then
-        area = 'alamo'
+    insideLake = alamo:isPointInside(plyPos)
+    insideSwan1 = swan1:isPointInside(plyPos)
+    insideSwan2 = swan2:isPointInside(plyPos)
+    insideSwan3 = swan3:isPointInside(plyPos)
+    if insideSwan1 or insideSwan2 or insideSwan3 then
+        area = 'swan'
+    elseif insideLake then
+        area = 'lake'
     elseif insidePier1 or insidePier2 or insidePier3 or insidePier4 or insidePier5 or insidePier6 or insideArea1 or insideArea8 or insidePls or insideFish1 or insideFish2 or insideArea10 or insideArea15 then
-        area = 'ocean'
+        area = 'sea'
     end
     return area
+end
+
+
+function isNearFishingSpot()
+  local plyPos = GetEntityCoords(PlayerPedId())
+  local distance = 50
+  if pier1:isPointInside(plyPos, distance) or
+      pier2:isPointInside(plyPos, distance) or
+      pier3:isPointInside(plyPos, distance) or
+      pier5:isPointInside(plyPos, distance) or
+      pier6:isPointInside(plyPos, distance) or
+      fish1:isPointInside(plyPos, distance) or
+      pier1:isPointInside(plyPos, distance) or
+      fish2:isPointInside(plyPos, distance) or
+      area1:isPointInside(plyPos, distance) or
+      area8:isPointInside(plyPos, distance) or
+      area10:isPointInside(plyPos, distance) or
+      area15:isPointInside(plyPos, distance) or
+      pls:isPointInside(plyPos, distance) or
+      alamo:isPointInside(plyPos, distance) then
+      return true
+  else
+      return false
+  end
 end

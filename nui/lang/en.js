@@ -20,7 +20,15 @@ Lang['en'] = {
 	confirmation_modal_sell_vehicle: 'Are you sure you want to sell this vehicle?',
 
 	statistics_page_title: 'Statistics',
-	statistics_page_desc: 'Statistics of your truck company',
+	statistics_page_desc: 'Statistics of your fishing life',
+	statistics_page_money_earned: "Total money earned",
+	statistics_page_money_spent: "Total money spent",
+	statistics_page_total_rare_fish: "Total rare fish caught",
+	statistics_page_total_common_fish: "Total common fish caught",
+	statistics_page_total_dives: "Total dives finished",
+	statistics_page_total_deliveries: "Total deliveries finished",
+	fishs_rare_caught: "Rare fish caught",
+	fishs_common_caught: "Rare common caught",
 	
 	deliveries_page_title: 'Deliveries',
 	deliveries_page_desc: 'Complete orders to receive special pricing for fishes.',
@@ -109,20 +117,20 @@ Lang['en'] = {
 	equipments_page_desc: "Buy some improvments to improve your way of fishing",
 
 	equipment_page_windlass: 'Windlass',
-	equipment_page_windlass_desc: 'Upgrade your windlass to fish easier.',
-	equipment_page_windlass_level: '+{0} easy',
+	equipment_page_windlass_desc: 'Upgrade your windlass hook the fish faster.',
+	equipment_page_windlass_level: 'It will hook the fish +{0}% faster',
 
 	equipment_page_rod: 'Rod',
-	equipment_page_rod_desc: 'Upgrade your rod to get more rare fishes.',
-	equipment_page_rod_level: '+{0} rare',
+	equipment_page_rod_desc: 'Upgrade your rod to get more rare fishs.',
+	equipment_page_rod_level: 'The change of getting rare fish will improve',
 
 	equipment_page_gimp: 'Gimp',
-	equipment_page_gimp_desc: 'Upgrade your gimp to your fishing last longer.',
-	equipment_page_gimp_level: '+{0} longer',
+	equipment_page_gimp_desc: 'Upgrade your gimp to your reeling start easier.',
+	equipment_page_gimp_level: '+{0}% of chance that will start on the difficulty hard',
 
 	equipment_page_bait: 'Bait',
 	equipment_page_bait_desc: 'Upgrade your bait to fish faster.',
-	equipment_page_bait_level: '+{0} faster',
+	equipment_page_bait_level: '+{0}ms on delay to start your fishing',
 	
 	navigation_tab_equipments_windlass: "Windlass",
 	navigation_tab_equipments_rod: "Rod",
@@ -197,6 +205,16 @@ Lang['en'] = {
 	stock_page_withdraw_modal_amount: 'Amount',
 	stock_page_withdraw_modal_cancel: 'Cancel',
 
-
+	//fishing area
+	
+	hook: "A FISH APPEARED!",
+	success: "SUCCESS",
+	got_away2: "GOT AWAY",
+	fail: "FAIL",
+	fish_bite: "A FISH BITE!",
+	too_soon: "TOO EARLY!",
+	wait_fish: "WAIT",
+	hook_command: "Action (hook and reel)",
+	exit_fishing: "Quit fishing game now"
 
 };

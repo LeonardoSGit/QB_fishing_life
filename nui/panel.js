@@ -1,5 +1,34 @@
 let config = {};
 let lang = 'en';
+var progress = 0;
+var animCancel = false;
+var bobbing = false;
+var nibble = false;
+var bite = false;
+var reeling = false;
+var fishBite = false;
+var tensionIncrease = null; //speed of tension increase. lower = faster/harder
+var tensionDecrease = null; //speed of tension decrease. lower = faster/easier
+var progressIncrease = null; //speed of percent increase. lower = faster/easier
+var progressDecrease = null; //speed of percent decrease. lower = faster/harder
+var uiOpen = false;
+var _success;
+var _fail;
+var _gotAway;
+var _tooSoon;
+var _fishBite ;
+var playerFishing = {};
+const currentKeysPressed = {};
+const fishingreel = document.getElementById("circle-container");
+function display(bool) {
+	uiOpen = bool;
+	if (bool) {
+		$("#fishingUI").css("display", "");
+	} else {
+		$("#fishingUI").css("display", "none");
+	}
+  }
+  display(false)
 
 window.addEventListener('message', async function (event) {
 	var item = event.data;
@@ -30,9 +59,10 @@ window.addEventListener('message', async function (event) {
 		let lake = config.lake
 		let sea = config.sea
 
+		$(document).off('click',handleClickOnFishingGame)
 		if (item.isUpdate != true) {
 			// Open on first time
-			renderStaticTexts();
+			renderStaticTexts(fishing_life_users,equipments_upgrades);
 
 			$('#css-toggle').prop('checked', fishing_life_users.dark_theme).change();
 			openPage('profile');
@@ -45,7 +75,7 @@ window.addEventListener('message', async function (event) {
 		$("#player-info-skill").text(Utils.numberFormat(fishing_life_users.skill_points,0))
 		$("#player-info-money").text(Utils.currencyFormat(fishing_life_users.money,0))
 
-		renderStatisticsPage();
+		renderStatisticsPage(fishing_life_users);
 		renderDeliveriesPage(fishing_available_contracts, fishing_life_users);
 		renderDivesPage(fishing_available_dives, fishing_life_users);
 		renderStorePage(available_items_store,available_vehicles,available_boats,available_properties,owned_properties);
@@ -58,6 +88,7 @@ window.addEventListener('message', async function (event) {
 
 		createListeners();
 	} else if(item.openPropertyUI){
+		$(document).off('click',handleClickOnFishingGame)
 		config = item.data.config;
 		renderStaticTextsProperty()
 		/*
@@ -76,8 +107,402 @@ window.addEventListener('message', async function (event) {
 		$(".main").css("display", "none");
 		$(".main-stock").css("display", "none");
 	}
+	//FISHING AREA
+	if (item.type === "start") {
+		progress = 0;
+		$(document).on('click',handleClickOnFishingGame)
+		SetProgress(progress);
+		playerFishing = item.player
+        let x = item.x * 100 + "%";
+        let y = item.y * 100 + "%";
+        fishingreel.style.left = x;
+        fishingreel.style.top = y;
+        fishBite = false;
+        animCancel = false;
+        bobbing = false;
+        nibble = false;
+        bite = false;
+        reeling = false;
+        display(true);  
+		$("#text-progress").html(Utils.translate("wait_fish"));
+		$("#controls-text-mouse").text(Utils.translate("hook_command"))
+		$("#controls-text-esc").text(Utils.translate("exit_fishing"))
+		bob()
+      } else if (item.type === "updatePos") {
+        let x = item.x * 100 + "%";
+        let y = item.y * 100 + "%";
+        fishingreel.style.left = x;
+        fishingreel.style.top = y;
+      }
+	  else if (item.type === "updateDifficulty") {
+		tensionIncrease = item.tensionIncrease;
+		tensionDecrease = item.tensionDecrease;
+		progressIncrease = item.progressIncrease;
+		progressDecrease = item.progressDecrease;
+	  }
+	   else if (item.type === "close") {
+        display(false);
+        cancelReset("", true);
+		$(document).off('click',handleClickOnFishingGame)
+      } else if (item.type === "hide") {
+        display(false);
+		$(document).off('click',handleClickOnFishingGame)
+      } else if (item.type === "show") {
+        display(true);
+      } else if (item.type === "setLocale") {
+		playerFishing = item.player
+        _success = item.success;
+        _fail = item.fail;
+        _gotAway = item.gotaway;
+        _tooSoon = item.toosoon;
+		_fishBite = item.fishBite
+		$("#controls-text-mouse").text(Utils.translate("hook_command"))
+		$("#controls-text-esc").text(Utils.translate("exit_fishing"))
+      }
+	async function bob() {
+		SwapScenes("bobber");
+		bobbing = true;
+		for (let y = 0; y < getDelayOnStartFishing(); y++) {
+		  if (animCancel === true) {
+			bobbing = false;
+			return;
+		  }
+		  await delay(100);
+		}
+		$("#text-progress").html("");
+		let x = getRandomInt(3, 6);
+		for (let counter = 0; counter < x; counter++) {
+		  if (animCancel === true) {
+			bobbing = false;
+			return;
+		  }
+		  $("#circle-outer").animate(
+			{
+			  top: "-=20%",
+			},
+			500
+		  );
+		  $("#circle-outer").animate(
+			{
+			  top: "+=20%",
+			},
+			500
+		  );
+		  await delay(1000);
+		}
+		bobbing = false;
+		hook();
+	  }
+
+	  function getRandomInt(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min) + min);
+	  }
+	
+	  function SwapScenes(scene) {    
+		if (scene == "bobber") {
+			$("#reeling").hide();
+			$("#hook").hide();
+			$("#circle-inner").hide();
+			$("#wrapper").hide();
+			$(".progressfish").css("width", "190px");
+			$(".progressfish").css("stroke", "white");
+			$("#text-progress").html("");
+			$("#bobber").show();
+		}
+		else if (scene == "hook") {
+		  $("#reeling").hide();
+		  $("#circle-inner").hide();
+		  $("#bobber").hide();
+		  $(".progressfish").css("width", "140px");
+		  $(".progressfish").css("stroke", "rgba(0, 157, 134,1.0)");
+		  $("#text-progress").html(Utils.translate("hook"));
+		  $("#wrapper").show();
+		  $("#hook").show();
+		}else if (scene == "reel") {
+			$("#bobber").hide();
+			$("#hook").hide();
+			$(".progressfish").css("width", "190px");
+			$(".progressfish").css("stroke", "white");
+			SetProgress(0);
+			$("#reeling").show();
+			$("#circle-inner").show();
+			$("#wrapper").show();
+		}
+	  }
+  
+	  function SetProgress(val) {
+		var max = -219.99078369140625;
+		$(".progressfish")
+		  .children($(".fill"))
+		  .attr("style", "stroke-dashoffset: " + ((100 - val) / 100) * max);
+	  }
+	  function delay(time) {
+		return new Promise((resolve) => setTimeout(resolve, time));
+	  }
+	
+	  async function hook() {
+		nibble = true;
+		SwapScenes("hook");
+		var id = setInterval(countdown, 3);
+		var x = 100;
+		for (let count2 = 0; count2 < 5; count2++) {
+		  $("#circle-outer").animate(
+			{
+			  left: "-=2%",
+			},
+			100
+		  );
+		  $("#circle-outer").animate(
+			{
+			  left: "+=2%",
+			},
+			100
+		  );
+		  if (animCancel === true) {
+			nibble = false;
+			return;
+		  }
+		}
+	
+		function countdown() {
+		  if (x <= 0) {
+			nibble = false;
+			clearInterval(id);
+			cancelReset(_fail, false);
+		  }
+		  if (bite == true) {
+			nibble = false;
+			clearInterval(id);	
+			cancelReset(_fishBite, true);
+		  }
+		  x = x - getDiffTimerToHook();
+		  SetProgress(x);
+		}
+		await delay(500 * 5);
+	  }
+	
+	  async function cancelReset(message, pass) {
+		animCancel = true;
+		SetProgress(0);    
+		if (message == _success) {
+			fishBite = false;
+		}	  
+		$("#circle-outer").stop(true);
+		if (pass == false) {  
+			fishBite = false;
+		  $("#text-progress").show();
+		  $("#text-progress").html(message);
+		  $("#text-progress").css("color", "red");
+		  $("#circle-inner").css("height", "1%");
+		  $("#circle-inner").css("width", "1%");
+		  $("#circle-inner").css("background-color", "rgba(255,0,0,0.6)");
+		} else {
+		  $("#text-progress").html(message);
+		  $("#text-progress").css("color", "rgba(0, 157, 134,1.0)");
+		  $("#circle-inner").css("height", "1%");
+		  $("#circle-inner").css("width", "1%");
+		  $("#circle-inner").css("background-color", "rgba(0, 157, 134,0.6)");
+		}
+		setTimeout(function () {
+			$("#text-progress").css("color", "white");
+			$("#text-progress").html("0%");
+			$("#circle-inner").css("background-color", "rgba(0, 157, 134,0.6)");
+			$("#circle-outer").css("left", "50%");
+			$("#circle-outer").css("top", "50%");
+		  if (pass == false) {
+			closeFishingUi(pass)
+			progress = 0;
+			animCancel = false;
+			bobbing = false;
+			nibble = false;
+			fishBite = false;
+			bite = false;
+			reeling = false;
+		  }
+		  if (message == _fishBite) {
+			fishBite = true;
+			SwapScenes("reel");
+		  }else if (message == _success) {
+			fishBite = false;
+			progress = 0;
+			animCancel = false;
+			bobbing = false;
+			nibble = false;
+			bite = false;
+			reeling = false;
+		  }
+		}, 2000);
+	  }
+
+		  
+
+	  function getDiffTimerToHook(){
+		switch (playerFishing.windlass_upgrade){
+			case 1:
+				return 1
+			case 2:
+				return 0.8
+			case 3:
+				return 0.6
+			case 4:
+				return 0.4
+			case 5:
+				return 0.2
+		}
+	  }
+	  
+	  function getDelayOnStartFishing(){
+		switch (playerFishing.bait_upgrade){
+			case 1:
+				return 200
+			case 2:
+				return 160
+			case 3:
+				return 120
+			case 4:
+				return 80
+			case 5:
+				return 40
+		}
+
+	  }
+	  
+
+function handleClickOnFishingGame(e){
+	e.preventDefault()
+	e.stopPropagation()
+	if (e.button == 0) {
+		if(uiOpen){
+			if (bobbing == true) {
+				cancelReset(_tooSoon, false);
+			} else if (nibble == true) {
+				bite = true;
+			}else if (fishBite == true) {
+				reeling = true;
+				updateTension(100, reeling, tensionIncrease);
+				updateProgress(reeling, progressIncrease);
+			}
+		}
+	}
+}
+
+$(document).unbind('keyup');
+
+$(document).bind('keyup', function(data){
+	data.preventDefault()
+	data.stopPropagation()
+	if (data.key == "Escape"){
+		if (uiOpen == true) {
+			animCancel = true;
+			SetProgress(0);
+			$("#text-progress").css("color", "white");
+			$("#text-progress").html(Utils.translate("wait_fish"));
+			$("#circle-inner").css("background-color", "rgba(0, 157, 134,0.6)");
+			$("#circle-outer").css("left", "50%");
+			$("#circle-outer").css("top", "50%");
+			progress = 0;
+			animCancel = false;
+			bobbing = false;
+			nibble = false;
+			bite = false;
+			reeling = false;
+			display(false);
+			closeFishingUi(false)
+		  }
+	}
 });
 
+$(document).one('mousedown', function(e){
+    if (fishBite == true || reeling == true) {
+        reeling = false;
+        updateTension(1, reeling, tensionDecrease);
+        updateProgress(reeling, progressDecrease);
+    }
+});
+
+
+	  function updateTension(tension, add, speed) {
+		var elem = document.getElementById("circle-inner");
+		var width = parseFloat(elem.style.height);
+		var id = setInterval(frame, speed);
+		function frame() {
+		  if (add === true) {
+			if (width >= tension || reeling == false || fishBite == false) {
+			  clearInterval(id);
+			  if (width >= tension) {
+				cancelReset(_gotAway, false);
+				updateTrackingFish(progress,true)
+				return;
+			  }
+			} else {
+			  width++;
+			  $("#circle-inner").css("height", width + "%");
+			  $("#circle-inner").css("width", width + "%");
+			  if (progress >= 100) {
+				cancelReset(_success, true);
+				closeFishingUi(true)
+			  }
+			}
+		  } else {
+			if (width <= tension || reeling == true || fishBite == false) {
+			  clearInterval(id);
+			} else {
+			  width--;
+			  $("#circle-inner").css("height", width + "%");
+			  $("#circle-inner").css("width", width + "%");
+			}
+		  }
+		  if (width <= 50) {
+			$("#circle-inner").css("background-color", "rgba(0, 157, 134,0.6)");
+		  } else if (width > 50 && width < 80) {
+			$("#circle-inner").css("background-color", "rgba(255,165,0, 0.6)");
+		  } else if (width >= 80) {
+			$("#circle-inner").css("background-color", "rgba(255,0,0,0.6)");
+		  }
+		}
+	  }
+	
+	  function updateProgress(add, speed) {
+		var id = setInterval(frame, speed);
+		var canUpdate = true;
+		function frame() {
+		  if (add === true) {
+			if (reeling === false || fishBite === false) {
+			  clearInterval(id);
+			} else {
+			  if (progress < 100) {
+				progress = progress + 0.1;
+				$("#text-progress").html(Math.floor(progress) + "%");
+				SetProgress(progress);
+			  }
+			}
+		  } else {
+			if (reeling === true || fishBite === false) {
+			  clearInterval(id);
+			} else {
+			  if (progress > 0) {
+				progress = progress - 0.001;
+				if (progress < 0) {
+				  progress = 0;
+				}
+			  }
+			  $("#text-progress").html(Math.floor(progress) + "%");
+			  SetProgress(progress);
+			}
+		  }
+		  if (canUpdate == true) {
+			canUpdate = false;
+			setTimeout(function () {
+			  canUpdate = true;
+			}, 1000);
+		  }
+		}
+	  }
+});
+
+	
 function createListeners() {
 	$('.sidebar-navigation ul li').on('click', function () {
 		$('li').removeClass('active');
@@ -107,7 +532,7 @@ function renderStaticTextsProperty(){
 
 }
 
-function renderStaticTexts() {
+function renderStaticTexts(fishinguser,equipments_upgrades) {
 	$(".pages").css("display", "none");
 	$(".main").css("display", "");
 	$(".main-page").css("display", "block");
@@ -117,6 +542,12 @@ function renderStaticTexts() {
 	// Statistics page
 	$('#main-page-title').text(Utils.translate('statistics_page_title'));
 	$('#main-page-desc').text(Utils.translate('statistics_page_desc'));
+	$('#profile-money-earned-text').text(Lang[lang]['statistics_page_money_earned']);
+	$('#profile-money-spent-text').text(Lang[lang]['statistics_page_money_spent']);
+	$('#profile-total-dives').text(Lang[lang]['statistics_page_total_dives']);
+	$('#profile-total-deliveries').text(Lang[lang]['statistics_page_total_deliveries']);
+	$('#profile-total-rare-fish').text(Lang[lang]['statistics_page_total_rare_fish']);
+	$('#profile-total-common-fish').text(Lang[lang]['statistics_page_total_common_fish']);
 
 	// Deliveries page
 	$('#deliveries-title-div').html(`
@@ -147,10 +578,10 @@ function renderStaticTexts() {
 	// Equipments page
 	$('#equipments-page-title').text(Lang[lang]['equipments_page_title']);
 	$('#equipments-page-desc').text(Lang[lang]['equipments_page_desc']);
-	$('#windlass-equipments-desc').text(Lang[lang]['equipment_page_windlass_desc']);
-	$('#gimp-equipments-desc').text(Lang[lang]['equipment_page_gimp_desc']);
+	$('#windlass-equipments-desc').text(Lang[lang]['equipment_page_windlass_desc'].format(equipments_upgrades.windlass[fishinguser.windlass_upgrade - 1].level_reward));
+	$('#gimp-equipments-desc').text(Lang[lang]['equipment_page_gimp_desc'].format(equipments_upgrades.gimp[fishinguser.gimp_upgrade - 1].level_reward));
 	$('#rod-equipments-desc').text(Lang[lang]['equipment_page_rod_desc']);
-	$('#bait-equipments-desc').text(Lang[lang]['equipment_page_bait_desc']);
+	$('#bait-equipments-desc').text(Lang[lang]['equipment_page_bait_desc'].format(equipments_upgrades.bait[fishinguser.bait_upgrade - 1].level_reward));
 
 
 	// Store page
@@ -270,7 +701,13 @@ function renderStaticTexts() {
 	$('#owned-vehicle-navigation-tab').append(getOwnedVehicleTabHTML());
 }
 
-function renderStatisticsPage() {
+function renderStatisticsPage(user) {
+	$('#profile-money-earned2').text( Utils.currencyFormat(user.total_money_earned));
+	$('#profile-money-spent2').text( Utils.currencyFormat(user.total_money_spent));
+	$('#profile-total-rare-fish-2').text(user.fishs_rare_caught);
+	$('#profile-total-common-fish-2').text(user.fishs_common_caught);
+	$('#profile-total-dives-2').text(user.total_dives);
+	$('#profile-total-deliveries-2').text(user.total_deliveries);
 
 }
 
@@ -511,9 +948,6 @@ function renderGuidePage(fishs_available,sea,lake,swan){
 	$('#guide-sea-page-list').empty();
 	$('#guide-lake-page-list').empty();
 	$('#guide-swan-page-list').empty();
-	let colorLake = 'blue'
-	let colorSwan = 'green'
-	let colorSea = 'lightblue'
 	let levelSea = 0 ;
 	for (const difSea of sea) {
 		levelSea++;
@@ -523,8 +957,8 @@ function renderGuidePage(fishs_available,sea,lake,swan){
 			let fishHtml = `
 				<div class="col-3 mb-3">
 				<div class="card h-100">
-					<div class="card" style= "border: 1px solid ${colorSea}">
-						<h5 class="mb-2" style="text-align:center; color:${colorSea}">${Utils.translate('sea')}</h5>
+					<div class="card">
+						<h5 class="mb-2" style="text-align:center;">${Utils.translate('sea')}</h5>
 						<img src="${fish.img}" class="card-img-top w-50" style= "align-self:center">
 						<div class="card-body pt-0 px-0 pb-2">
 							<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('level_abbreviate')} ${levelSea}</span>
@@ -563,8 +997,8 @@ function renderGuidePage(fishs_available,sea,lake,swan){
 				let fishHtml = `
 					<div class="col-3 mb-3">
 					<div class="card h-100">
-					<div class="card" style= "border: 1px solid ${colorLake}">
-						<h5 class="mb-2" style="text-align:center; color:${colorLake}">${Utils.translate('lake')}</h5>
+					<div class="card">
+						<h5 class="mb-2" style="text-align:center;">${Utils.translate('lake')}</h5>
 							<img src="${fish.img}" class="card-img-top w-50" style= "align-self:center">
 							<div class="card-body pt-0 px-0 pb-2">
 								<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('level_abbreviate')} ${levelLake}</span>
@@ -603,8 +1037,8 @@ function renderGuidePage(fishs_available,sea,lake,swan){
 				let fishHtml = `
 					<div class="col-3 mb-3">
 					<div class="card h-100">
-					<div class="card" style= "border: 1px solid ${colorSwan}">
-						<h5 class="mb-2" style="text-align:center; color:${colorSwan}">${Utils.translate('swan')}</h5>
+					<div class="card">
+						<h5 class="mb-2" style="text-align:center;">${Utils.translate('swan')}</h5>
 							<img src="${fish.img}" class="card-img-top w-50" style= "align-self:center">
 							<div class="card-body pt-0 px-0 pb-2">
 								<div class="d-flex flex-row justify-content-between mt-3 px-3"> <span class="text-muted">${Utils.translate('level_abbreviate')} ${levelSwan}</span>
@@ -879,31 +1313,39 @@ function  renderStockPage(property, properties,players_items_fishing,fishs_avail
 	$('#stock-values').text(`${property.stock_amount}/${max_stock} ${Utils.translate('weight_unit')}`);
 	$('#stock-progress-bar').html(`<div class="progress-bar bg-primary" role="progressbar" style="width: ${stock_capacity_percent}%" aria-valuenow="${stock_capacity_percent}" aria-valuemin="0" aria-valuemax="100">${stock_capacity_percent}%</div>`);
 	$('#stock-table-body').empty();
-	if (Object.keys(arr_stock).length > 0) {
-		arr_stock = Object.keys(arr_stock).sort().reduce(
-			(obj, key) => { 
-			obj[key] = arr_stock[key]; 
-			return obj;
-			}, 
-			{}
-		);
-		
-		for (const stock_item in arr_stock) {
-			let item = null
-			if(stock_item.toLowerCase().includes('fish')){
-				item = fishs_available[stock_item]
-			} 
-			if (item) {
-				$('#stock-table-body').append(`
-					<tr data-toggle="modal" data-target="#withdraw-item-modal" data-item="${stock_item}" data-amount="${arr_stock[stock_item]}" class="border-right border-left border-bottom">
-						<td class="d-flex align-items-center text-left"><img src="${item.img}" class="mr-2" style="width: 40px;">${item.name}</td>
-						<td class="align-middle">${item.weight} ${Utils.translate('weight_unit')}</td>
-						<td class="align-middle">${arr_stock[stock_item]}</td>
-					</tr>
-				`);
-			} else {
-				console.log(`Item '${stock_item}' from your stock does not exist in config, contact the server owner to remove that item from your database`)
+	if(arr_stock){
+		if (Object.keys(arr_stock).length > 0) {
+			arr_stock = Object.keys(arr_stock).sort().reduce(
+				(obj, key) => { 
+				obj[key] = arr_stock[key]; 
+				return obj;
+				}, 
+				{}
+			);
+			
+			for (const stock_item in arr_stock) {
+				let item = null
+				if(stock_item.toLowerCase().includes('fish')){
+					item = fishs_available[stock_item]
+				} 
+				if (item) {
+					$('#stock-table-body').append(`
+						<tr data-toggle="modal" data-target="#withdraw-item-modal" data-item="${stock_item}" data-amount="${arr_stock[stock_item]}" class="border-right border-left border-bottom">
+							<td class="d-flex align-items-center text-left"><img src="${item.img}" class="mr-2" style="width: 40px;">${item.name}</td>
+							<td class="align-middle">${item.weight} ${Utils.translate('weight_unit')}</td>
+							<td class="align-middle">${arr_stock[stock_item]}</td>
+						</tr>
+					`);
+				} else {
+					console.log(`Item '${stock_item}' from your stock does not exist in config, contact the server owner to remove that item from your database`)
+				}
 			}
+		}else {
+			$('#stock-table-body').append(`
+				<tr class="border-right border-left border-bottom">
+					<td colspan="4">${Utils.translate('stock_page_table_empty')}</td>
+				</tr>
+			`);
 		}
 	} else {
 		$('#stock-table-body').append(`
@@ -1180,13 +1622,21 @@ function spawnVehicle(vehicle_id) {
 	Utils.post("spawnVehicle",{vehicle_id})
 }
 function sellVehicle(vehicle_id) {
-	Utils.showDefaultDangerModal(() => Utils.post("sellVehicle",{vehicle_id}), Utils.translate('confirmation_modal_sell_vehicle')); // TODO: fazer modal de confirmaçao pras outras rotas q são criticas tipo essa de vender veiculo. Pra fazer o modal é só essa linha aqui, o resto é magica
+	Utils.showDefaultDangerModal(() => Utils.post("sellVehicle",{vehicle_id}), Utils.translate('confirmation_modal_sell_vehicle'));
 }
 function buyProperty(property_id,type) {
 	Utils.post("buyProperty",{property_id,type})
 }
 function sellProperty(property_id,type) {
-	Utils.post("sellPropertyy",{property_id})
+	Utils.post("sellProperty",{property_id})
+}
+
+function updateTrackingFish(progress, isItOver){
+	Utils.post("updateTrackingFish",{progress,isItOver},"updateTrackingFish")
+}
+
+function closeFishingUi(success){
+	Utils.post("closeFishingUi",{success})
 }
 
 function seePropertyStock(event) {
@@ -1417,8 +1867,11 @@ $(document).ready( function() {
 	document.onkeyup = function(data){
 		if (data.which == 27){
 			if ($(".main-stock").is(":visible") || $(".main").is(":visible") ){
-				$(".modal").modal('hide');
 				Utils.post("close","")
+			}
+			if(typeof $(".modal").modal == 'function'){
+				
+				$(".modal").modal('hide');
 			}
 		}
 	};
